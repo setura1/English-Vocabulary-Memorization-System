@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes,viewport-fit=cover">
-    <title>システム英単語修行 V13.1 究極管理版</title>
+    <title>システム英単語修行 V15.0 究極管理版</title>
     <style>
         :root {
             --bg: #030712;
@@ -30,11 +30,10 @@
         #app { display: none; position: fixed; inset: 0; background: var(--bg); flex-direction: column; padding: 12px; z-index: 100; }
         #app.active { display: flex; }
 
-        .container { max-width: 600px; margin: 0 auto; background: var(--container); border-radius: 28px; padding: 24px; border: 1px solid #374151; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
-        h1 { font-size: 22px; text-align: center; margin: 0 0 20px 0; color: var(--primary); font-weight: 900; letter-spacing: 1px; }
+        .container { max-width: 650px; margin: 0 auto; background: var(--container); border-radius: 28px; padding: 20px; border: 1px solid #374151; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        h1 { font-size: 20px; text-align: center; margin: 0 0 15px 0; color: var(--primary); font-weight: 900; letter-spacing: 1px; }
 
-        /* ダッシュボード */
-        .dashboard { background: rgba(31, 41, 55, 0.5); border-radius: 24px; padding: 18px; margin-bottom: 24px; border: 1px solid #374151; }
+        .dashboard { background: rgba(31, 41, 55, 0.5); border-radius: 24px; padding: 18px; margin-bottom: 20px; border: 1px solid #374151; }
         .db-bar { height: 14px; display: flex; border-radius: 7px; overflow: hidden; background: #030712; margin-bottom: 12px; }
         .db-seg { height: 100%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
         .seg-a { background: var(--gold); }
@@ -44,7 +43,7 @@
         .db-legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
         .lg-item { text-align: center; }
         .lg-label { font-size: 10px; color: var(--gray); display: block; margin-bottom: 2px; }
-        .lg-val { font-size: 13px; font-weight: 900; font-variant-numeric: tabular-nums; }
+        .lg-val { font-size: 12px; font-weight: 900; }
 
         .label { font-size: 11px; font-weight: 800; color: var(--silver); margin: 16px 0 6px 4px; display: flex; justify-content: space-between; align-items: center; }
         .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
@@ -57,7 +56,8 @@
         .adj-btn { background: #334155; color: white; border: none; padding: 10px 14px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; min-width: 44px; }
         .adj-btn:active { transform: scale(0.9); background: var(--primary); }
 
-        input { width: 70px; background: transparent; border: none; color: white; font-size: 20px; font-weight: 900; text-align: center; }
+        input { width: 75px; background: transparent; border: none; color: white; font-size: 20px; font-weight: 900; text-align: center; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
         .range-box { background: linear-gradient(145deg, #1e1b4b, #111827); padding: 18px; border-radius: 24px; border: 1px solid var(--accent); margin-bottom: 18px; }
         textarea { width: 100%; height: 55px; background: rgba(0,0,0,0.4); color: #94a3b8; border: 1px solid #374151; border-radius: 14px; padding: 12px; font-size: 12px; margin-top: 6px; outline: none; resize: none; word-break: break-all; }
@@ -68,10 +68,11 @@
         .sm-btn { background: #374151; color: white; border: none; padding: 7px 14px; border-radius: 10px; font-size: 11px; cursor: pointer; font-weight: 800; }
         .io-btn { background: var(--accent); color: white; border: none; padding: 7px 14px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer; }
         
-        #card { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; gap: 15px; background: var(--card-bg); border-radius: 48px; margin: 10px 0; position: relative; border: 1px solid #374151; box-shadow: inset 0 0 30px rgba(0,0,0,0.3); }
-        #wordBadge { position: absolute; top: 40px; font-size: 24px; font-weight: 900; padding: 6px 20px; border-radius: 16px; background: rgba(0,0,0,0.3); border: 2px solid currentColor; }
-        #englishWord { font-size: 46px; font-weight: 900; line-height: 1.1; color: var(--text); word-break: break-word; max-width: 95%; margin-top: 30px; letter-spacing: -1px; }
-        #japaneseWord { font-size: 26px; color: var(--primary); font-weight: 800; visibility: hidden; min-height: 1.5em; margin-top: 15px; }
+        #card { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 25px; gap: 10px; background: var(--card-bg); border-radius: 48px; margin: 10px 0; position: relative; border: 1px solid #374151; box-shadow: inset 0 0 40px rgba(0,0,0,0.4); }
+        #wordBadge { position: absolute; top: 30px; font-size: 20px; font-weight: 900; padding: 4px 18px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 2px solid currentColor; }
+        
+        #englishWord { font-size: 46px; font-weight: 900; line-height: 1.1; color: var(--text); word-break: break-all; max-width: 95%; margin-top: 30px; }
+        #japaneseWord { font-size: 24px; color: var(--primary); font-weight: 800; visibility: hidden; min-height: 1.5em; margin-top: 15px; }
         #japaneseWord.visible { visibility: visible; }
         
         #timerTrack { width: 100%; height: 10px; background: #030712; margin-top: 25px; border-radius: 10px; overflow: hidden; opacity: 0; }
@@ -79,20 +80,20 @@
         #timerBar { height: 100%; background: var(--danger); width: 0%; }
 
         .progress-container { width: 100%; height: 8px; background: #1f2937; border-radius: 10px; overflow: hidden; margin: 8px 0; }
-        #progressBar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        #progressBar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s linear; }
         
         .ans-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; width: 100%; margin-bottom: 12px; }
         .ans-btn { height: 90px; border: none; border-radius: 32px; color: white; font-size: 26px; font-weight: 900; cursor: pointer; transition: 0.15s; }
         .ans-btn:active { transform: scale(0.94); }
-        #correctBtn { background: var(--success); box-shadow: 0 8px 20px -5px rgba(16, 185, 129, 0.4); }
-        #wrongBtn { background: var(--danger); box-shadow: 0 8px 20px -5px rgba(239, 68, 68, 0.4); }
+        #correctBtn { background: var(--success); }
+        #wrongBtn { background: var(--danger); }
     </style>
 </head>
 <body>
 
 <div id="setup" class="active">
     <div class="container">
-        <h1>システム英単語修行 V13.1</h1>
+        <h1>システム英単語修行 V15.0</h1>
 
         <div class="dashboard">
             <div class="db-bar">
@@ -114,7 +115,7 @@
                 <span style="color:#fff">データ復元 / 書き出し</span>
                 <div style="display:flex; gap:6px;">
                     <button class="io-btn" onclick="exportData()">出す</button>
-                    <button class="io-btn" style="background:#4b5563;" onclick="clearImport()">消す</button>
+                    <button class="io-btn" style="background:#4b5563;" onclick="clearImport()">消去</button>
                 </div>
             </div>
             <textarea id="importArea" oninput="updateDashboard()" placeholder="ここに「保存用データ」を貼り付けて復元"></textarea>
@@ -166,7 +167,7 @@
         <button id="correctBtn" class="ans-btn" onclick="processAnswer(true)">わかる (Z)</button>
     </div>
     <div style="display:flex; justify-content: space-between; padding: 5px 10px;">
-        <button onclick="finishTraining()" style="background:none; border:none; color:var(--gray); font-size:12px; font-weight:bold; cursor:pointer;">中断 (Space)</button>
+        <button onclick="finishTraining()" style="background:none; border:none; color:var(--gray); font-size:11px; font-weight:bold; cursor:pointer;">中断 (Space)</button>
         <button onclick="quickCopy()" id="midBtn" class="sm-btn">進捗保存コピー</button>
     </div>
 </div>
@@ -175,16 +176,16 @@
     <div class="container" style="text-align:center;">
         <h1>修行完了</h1>
         <div id="resultScore" style="font-size:32px; font-weight:900; color:var(--success); margin-bottom:20px;"></div>
-        <div class="label"><span>今回間違えた単語</span><button class="sm-btn" onclick="copyText('wrongListArea', this)">コピー</button></div>
-        <textarea id="wrongListArea" style="height:110px; color:var(--danger); border-color:var(--danger);" readonly></textarea>
+        <div class="label"><span>今回間違えた単語リスト</span><button class="sm-btn" onclick="copyText('wrongListArea', this)">コピー</button></div>
+        <textarea id="wrongListArea" style="height:110px; color:var(--danger);" readonly></textarea>
         <div class="label" style="margin-top:20px;"><span>保存用数値データ</span><button class="sm-btn" onclick="copyText('numericalArea', this)">コピー</button></div>
         <textarea id="numericalArea" style="height:70px;" readonly></textarea>
-        <button class="main-btn" onclick="location.reload()" style="margin-top:30px; background:var(--gray);">トップへ戻る</button>
+        <button class="main-btn" onclick="location.reload()" style="margin-top:25px; background:var(--gray);">トップへ戻る</button>
     </div>
 </div>
 
 <script>
-const TOTAL_WORDS_COUNT = 2027;
+let CURRENT_TOTAL = 2027;
 const WORDS = [];
 let mastery = {};
 let queue = [];
@@ -193,37 +194,16 @@ let activeWord = null;
 let stressTimer = null;
 let enVoice = null;
 
-// 音声品質向上
 function setupVoices() {
     const fn = () => {
         const voices = window.speechSynthesis.getVoices();
-        // プレミアム音声の優先順位サーチ
         enVoice = voices.find(v => v.name.includes('Google') && v.lang === 'en-US') || 
-                  voices.find(v => v.name.includes('Premium') && v.lang.startsWith('en')) ||
-                  voices.find(v => v.name.includes('Natural') && v.lang.startsWith('en')) ||
                   voices.find(v => v.lang === 'en-US') || 
                   voices.find(v => v.lang.startsWith('en'));
     };
     fn();
-    if (window.speechSynthesis.onvoiceschanged !== undefined) {
-        window.speechSynthesis.onvoiceschanged = fn;
-    }
+    window.speechSynthesis.onvoiceschanged = fn;
 }
-
-window.onload = () => {
-    const savedM = localStorage.getItem('sisutan_mastery_v13_1');
-    if (savedM) mastery = JSON.parse(savedM);
-    const savedC = localStorage.getItem('sisutan_config_v13_1');
-    if (savedC) {
-        const c = JSON.parse(savedC);
-        ['rangeStart', 'rangeEnd', 'rateEn', 'rateJa', 'limitTime', 'testLimit'].forEach(k => {
-            if (c[k]) document.getElementById(k).value = c[k];
-        });
-    }
-    loadData();
-    setupVoices();
-    updateDashboard();
-};
 
 function loadData() {
     const dataNode = document.getElementById('words-raw-data');
@@ -241,6 +221,12 @@ function loadData() {
     });
     WORDS.length = 0;
     WORDS.push(...Array.from(idMap.values()));
+    CURRENT_TOTAL = WORDS.length || 2027;
+
+    // 不具合修正：初期状態で終了IDをデータの最大数に合わせる
+    if(!localStorage.getItem('sisutan_config_v15')) {
+        document.getElementById('rangeEnd').value = CURRENT_TOTAL;
+    }
 }
 
 function updateDashboard() {
@@ -254,28 +240,28 @@ function updateDashboard() {
     }
     const counts = { a: 0, b: 0, c: 0, new: 0 };
     Object.values(tempMastery).forEach(v => counts[v]++);
-    counts.new = Math.max(0, TOTAL_WORDS_COUNT - (counts.a + counts.b + counts.c));
+    counts.new = Math.max(0, CURRENT_TOTAL - (counts.a + counts.b + counts.c));
 
     ['a', 'b', 'c', 'new'].forEach(k => {
-        const pct = (counts[k] / TOTAL_WORDS_COUNT * 100).toFixed(1);
+        const pct = (counts[k] / CURRENT_TOTAL * 100).toFixed(1);
         document.getElementById(`bar-${k}`).style.width = pct + '%';
         document.getElementById(`val-${k}`).textContent = `${counts[k]} (${pct}%)`;
     });
 }
 
 function saveAll() {
-    localStorage.setItem('sisutan_mastery_v13_1', JSON.stringify(mastery));
+    localStorage.setItem('sisutan_mastery_v15', JSON.stringify(mastery));
     const config = {};
     ['rangeStart', 'rangeEnd', 'rateEn', 'rateJa', 'limitTime', 'testLimit'].forEach(k => {
         config[k] = document.getElementById(k).value;
     });
-    localStorage.setItem('sisutan_config_v13_1', JSON.stringify(config));
+    localStorage.setItem('sisutan_config_v15', JSON.stringify(config));
 }
 
 function adj(id, delta) {
     const el = document.getElementById(id);
     el.value = Math.max(1, parseInt(el.value) + delta);
-    if(id==='rangeEnd' && el.value > 2027) el.value = 2027;
+    if(id==='rangeEnd' && el.value > CURRENT_TOTAL) el.value = CURRENT_TOTAL;
     saveAll(); updateDashboard();
 }
 
@@ -285,6 +271,21 @@ function adjF(id, delta) {
     el.value = Math.max(0.1, Math.round((v + delta) * 10) / 10).toFixed(1);
     saveAll();
 }
+
+window.onload = () => {
+    loadData();
+    const savedM = localStorage.getItem('sisutan_mastery_v15');
+    if (savedM) mastery = JSON.parse(savedM);
+    const savedC = localStorage.getItem('sisutan_config_v15');
+    if (savedC) {
+        const c = JSON.parse(savedC);
+        ['rangeStart', 'rangeEnd', 'rateEn', 'rateJa', 'limitTime', 'testLimit'].forEach(k => {
+            if (c[k]) document.getElementById(k).value = c[k];
+        });
+    }
+    setupVoices();
+    updateDashboard();
+};
 
 function startTraining() {
     if (WORDS.length === 0) loadData();
@@ -302,17 +303,19 @@ function startTraining() {
     const limit = parseInt(document.getElementById('testLimit').value);
     
     let available = WORDS.filter(w => w.id >= start && w.id <= end);
-    const priority = (id) => {
-        const s = mastery[id];
-        if (s === 'c') return 1;
-        if (!s) return 1.5;
-        if (s === 'b') return 2;
-        return 3;
-    };
-    available.sort((x, y) => priority(x.id) - priority(y.id) || Math.random() - 0.5);
+    available.sort((x, y) => {
+        const priority = (id) => {
+            const s = mastery[id];
+            if (s === 'c') return 1;
+            if (!s) return 1.5;
+            if (s === 'b') return 2;
+            return 3;
+        };
+        return priority(x.id) - priority(y.id) || Math.random() - 0.5;
+    });
+    
     queue = available.slice(0, limit);
-
-    if (queue.length === 0) return alert("対象がありません");
+    if (queue.length === 0) return alert("範囲内に単語が見つかりません。");
     results = [];
     document.getElementById("setup").classList.remove('active');
     document.getElementById("app").classList.add('active');
@@ -332,15 +335,14 @@ function nextWord() {
     if (queue.length === 0) return finishTraining();
     activeWord = queue.shift();
     
-    const currentNum = results.length + 1;
-    const totalNum = results.length + queue.length + 1;
-    document.getElementById("infoText").textContent = `ID:${activeWord.id} | ${currentNum} / ${totalNum}`;
-    document.getElementById("progressBar").style.width = `${(results.length / totalNum) * 100}%`;
+    const total = results.length + queue.length + 1;
+    document.getElementById("infoText").textContent = `ID:${activeWord.id} | ${results.length+1} / ${total}`;
+    document.getElementById("progressBar").style.width = `${(results.length / total) * 100}%`;
     
     const badge = document.getElementById("wordBadge");
     const status = mastery[activeWord.id];
     badge.textContent = status ? status : "NEW";
-    badge.style.color = status === 'c' ? "var(--danger)" : (status === 'b' ? "var(--accent)" : (status === 'a' ? "var(--gold)" : "var(--silver)"));
+    badge.style.color = status === 'c' ? "var(--danger)" : (status === 'b' ? "var(--accent)" : (status === 'a' ? "var(--gold)" : "var(--gray)"));
 
     document.getElementById("englishWord").textContent = activeWord.en;
     document.getElementById("japaneseWord").textContent = activeWord.ja;
@@ -400,8 +402,7 @@ function finishTraining() {
     document.getElementById("report").classList.add('active');
     const okCount = results.filter(r => r.ok).length;
     const missed = results.filter(r => !r.ok);
-    const accuracy = ((okCount / results.length) * 100 || 0).toFixed(1);
-    document.getElementById("resultScore").textContent = `${okCount} / ${results.length} (${accuracy}%)`;
+    document.getElementById("resultScore").textContent = `${okCount} / ${results.length} (${((okCount/results.length)*100||0).toFixed(1)}%)`;
     document.getElementById("wrongListArea").value = missed.map(m => m.raw).join('\n');
     document.getElementById("numericalArea").value = Object.keys(mastery).sort((a, b) => a - b).map(id => `${id}${mastery[id]}`).join(',');
 }
@@ -435,7 +436,7 @@ function exportData() {
 function clearImport() {
     if(!confirm("リセットしますか？")) return;
     mastery = {}; document.getElementById('importArea').value = '';
-    localStorage.removeItem('sisutan_mastery_v13_1'); updateDashboard();
+    localStorage.removeItem('sisutan_mastery_v15'); updateDashboard();
 }
 
 document.onkeydown = (e) => {

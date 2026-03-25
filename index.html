@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes,viewport-fit=cover">
-    <title>システム英単語修行 極限管理版V3.2</title>
+    <title>システム英単語修行 極限管理版V4.0</title>
     <style>
         :root {
             --bg: #070b14;
@@ -22,60 +22,64 @@
             overflow-x: hidden; touch-action: manipulation;
         }
         
-        #setup, #report { padding: 20px; height: 100vh; overflow-y: auto; display: none; }
+        #setup, #report { padding: 15px; min-height: 100vh; overflow-y: auto; display: none; }
         #setup.active, #report.active { display: block; }
         #app { display: none; position: fixed; inset: 0; background: var(--bg); flex-direction: column; padding: 20px; z-index: 100; }
         #app.active { display: flex; }
 
-        .container { max-width: 600px; margin: 0 auto; background: var(--container); border-radius: 32px; padding: 24px; border: 1px solid #1f2937; }
-        h1 { font-size: 22px; text-align: center; margin-bottom: 20px; color: var(--primary); font-weight: 900; letter-spacing: 1px; }
-        .label { font-size: 12px; font-weight: bold; color: var(--gray); margin: 15px 0 5px 4px; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 600px; margin: 0 auto; background: var(--container); border-radius: 24px; padding: 20px; border: 1px solid #1f2937; }
+        h1 { font-size: 20px; text-align: center; margin-bottom: 20px; color: var(--primary); font-weight: 900; letter-spacing: 1px; }
         
-        .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-        .input-group { background: #1f2937; padding: 10px; border-radius: 12px; border: 1px solid #374151; }
-        .input-group span { font-size: 10px; display: block; margin-bottom: 5px; color: #9ca3af; }
+        .label { font-size: 11px; font-weight: bold; color: var(--gray); margin: 12px 0 4px 4px; display: flex; justify-content: space-between; align-items: center; }
         
-        .adj-container { display: flex; align-items: center; gap: 8px; }
-        .adj-btn { background: #374151; color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        /* スマホで数値が隠れないようグリッドを調整 */
+        .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+        @media (max-width: 480px) { .param-grid { grid-template-columns: 1fr; } }
+
+        .input-group { background: #1f2937; padding: 8px; border-radius: 12px; border: 1px solid #374151; }
+        .input-group span { font-size: 9px; display: block; margin-bottom: 4px; color: #9ca3af; }
+        
+        .adj-container { display: flex; align-items: center; gap: 6px; }
+        .adj-btn { background: #374151; color: white; border: none; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; }
         .adj-btn:active { background: var(--primary); transform: scale(0.9); }
 
         input { 
-            width: 100%; background: transparent; border: none; color: white; 
-            font-size: 18px; font-weight: bold; outline: none; text-align: center;
+            flex: 1; min-width: 40px; background: transparent; border: none; color: white; 
+            font-size: 16px; font-weight: bold; outline: none; text-align: center;
         }
 
-        .range-box { background: #1e1b4b; padding: 15px; border-radius: 16px; border: 1px solid var(--accent); margin-bottom: 15px; }
-        textarea { width: 100%; height: 60px; background: rgba(0,0,0,0.4); color: #94a3b8; border: 1px solid #374151; border-radius: 12px; padding: 10px; font-size: 11px; margin-top: 5px; outline: none; }
+        .range-box { background: #1e1b4b; padding: 12px; border-radius: 16px; border: 1px solid var(--accent); margin-bottom: 15px; }
+        textarea { width: 100%; height: 60px; background: rgba(0,0,0,0.4); color: #94a3b8; border: 1px solid #374151; border-radius: 12px; padding: 10px; font-size: 11px; margin-top: 5px; outline: none; resize: none; }
 
-        button.main-btn { width: 100%; height: 60px; border: none; border-radius: 20px; font-size: 20px; font-weight: 900; cursor: pointer; background: var(--primary); color: white; transition: 0.2s; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
+        button.main-btn { width: 100%; height: 56px; border: none; border-radius: 16px; font-size: 18px; font-weight: 900; cursor: pointer; background: var(--primary); color: white; transition: 0.2s; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
         button.main-btn:active { transform: scale(0.98); }
+
+        .copy-btn { background: var(--gray); color: white; border: none; padding: 3px 10px; border-radius: 6px; font-size: 9px; cursor: pointer; font-weight: bold; }
         
-        #card { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; text-align: center; }
-        #englishWord { font-size: 52px; font-weight: 900; letter-spacing: -2px; line-height: 1.1; word-break: break-all; }
-        #japaneseWord { font-size: 24px; margin-top: 20px; color: var(--primary); font-weight: bold; opacity: 0; min-height: 1.5em; }
+        #card { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; text-align: center; gap: 10px; }
+        #englishWord { font-size: 48px; font-weight: 900; letter-spacing: -1px; line-height: 1.1; word-break: break-all; color: var(--text); }
+        #japaneseWord { font-size: 22px; color: var(--primary); font-weight: bold; opacity: 0; min-height: 1.5em; transition: opacity 0.1s; }
         #japaneseWord.visible { opacity: 1; }
         
-        .progress-container { width: 100%; height: 6px; background: #1f2937; border-radius: 3px; overflow: hidden; margin: 10px 0; }
+        #gauge { position: absolute; bottom: 0; left: 0; height: 4px; background: var(--danger); width: 0%; }
+
+        .progress-container { width: 100%; height: 4px; background: #1f2937; border-radius: 2px; overflow: hidden; margin: 8px 0; }
         #progressBar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s linear; }
         
-        .ans-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; margin-bottom: 20px; }
-        .ans-btn { height: 85px; border: none; border-radius: 28px; color: white; font-size: 24px; font-weight: bold; cursor: pointer; }
+        .ans-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-bottom: 15px; }
+        .ans-btn { height: 75px; border: none; border-radius: 20px; color: white; font-size: 20px; font-weight: bold; cursor: pointer; }
         #correctBtn { background: var(--success); }
         #wrongBtn { background: var(--danger); }
         
-        #gauge { position: absolute; bottom: 0; left: 0; height: 4px; background: var(--success); width: 0%; }
-        .toggle-btn { background: #374151; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+        .toggle-btn { background: #374151; color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 10px; cursor: pointer; }
         .toggle-btn.active { background: var(--success); }
-
-        #remainingCounter { font-weight: bold; color: var(--accent); }
-        #timeResultDisplay { font-size: 12px; color: var(--gray); margin-bottom: 15px; line-height: 1.4; }
     </style>
 </head>
 <body>
 
 <div id="setup" class="active">
     <div class="container">
-        <h1>システム英単語修行</h1>
+        <h1>システム英単語修行 V4.0</h1>
         
         <div class="range-box">
             <div class="label">修行範囲と問題数</div>
@@ -84,7 +88,7 @@
                     <span>開始ID</span>
                     <div class="adj-container">
                         <button type="button" class="adj-btn" onclick="adjustValue('rangeStart', -100)">-100</button>
-                        <input type="number" id="rangeStart" value="1" pattern="\d*" inputmode="numeric">
+                        <input type="number" id="rangeStart" value="1" inputmode="numeric">
                         <button type="button" class="adj-btn" onclick="adjustValue('rangeStart', 100)">+100</button>
                     </div>
                 </div>
@@ -92,45 +96,45 @@
                     <span>終了ID</span>
                     <div class="adj-container">
                         <button type="button" class="adj-btn" onclick="adjustValue('rangeEnd', -100)">-100</button>
-                        <input type="number" id="rangeEnd" value="2027" pattern="\d*" inputmode="numeric">
+                        <input type="number" id="rangeEnd" value="2027" inputmode="numeric">
                         <button type="button" class="adj-btn" onclick="adjustValue('rangeEnd', 100)">+100</button>
                     </div>
                 </div>
             </div>
-            <div class="input-group" style="background: rgba(255,255,255,0.1);">
-                <span>今回の修行数 (指定数で終了)</span>
+            <div class="input-group" style="background: rgba(255,255,255,0.05);">
+                <span>やる個数</span>
                 <div class="adj-container">
-                    <button type="button" class="adj-btn" onclick="adjustValue('testLimit', -100)">-100</button>
-                    <input type="number" id="testLimit" value="100" pattern="\d*" inputmode="numeric">
-                    <button type="button" class="adj-btn" onclick="adjustValue('testLimit', 100)">+100</button>
+                    <button type="button" class="adj-btn" onclick="adjustValue('testLimit', -10)">-10</button>
+                    <input type="number" id="testLimit" value="100" inputmode="numeric">
+                    <button type="button" class="adj-btn" onclick="adjustValue('testLimit', 10)">+10</button>
                 </div>
             </div>
         </div>
 
         <div class="label">
-            音声読み上げ
+            読み上げ設定
             <button id="ttsToggle" class="toggle-btn active" onclick="toggleTTS()">読み上げON</button>
         </div>
         <div class="param-grid">
-            <div class="input-group"><span>読み上げ速度</span><input type="number" id="speechRate" value="1.5" step="0.1" inputmode="decimal"></div>
-            <div class="input-group"><span>音声の間隔(秒)</span><input type="number" id="voiceGap" value="0.0" step="0.1" inputmode="decimal"></div>
+            <div class="input-group"><span>英語速度</span><input type="number" id="speechRateEn" value="1.5" step="0.1" inputmode="decimal"></div>
+            <div class="input-group"><span>日本語速度</span><input type="number" id="speechRateJa" value="1.5" step="0.1" inputmode="decimal"></div>
         </div>
 
-        <div class="label">修行テンポ調整(秒)</div>
+        <div class="label">修行テンポ調整 (秒)</div>
         <div class="param-grid">
-            <div class="input-group"><span>英単語想起待ち</span><input type="number" id="engTime" value="1.2" step="0.1" inputmode="decimal"></div>
-            <div class="input-group"><span>日本語確認時間</span><input type="number" id="japTime" value="1.5" step="0.1" inputmode="decimal"></div>
+            <div class="input-group"><span>想起待ち</span><input type="number" id="engTime" value="1.2" step="0.1" inputmode="decimal"></div>
+            <div class="input-group"><span>日本語終了後</span><input type="number" id="japTime" value="1.0" step="0.1" inputmode="decimal"></div>
         </div>
 
-        <div class="label">暗記管理データ（数値貼り付け）</div>
-        <textarea id="importArea" placeholder="前回の修行数値をここに貼り付けて復元"></textarea>
+        <div class="label">データ復元（数値のみ貼り付け）</div>
+        <textarea id="importArea" placeholder="ID:Lv:Iv,..."></textarea>
 
-        <button class="main-btn" onclick="startTraining()">修行開始</button>
+        <button class="main-btn" onclick="startTraining()" style="margin-top: 15px;">修行開始</button>
     </div>
 </div>
 
 <div id="app">
-    <div id="infoText" style="text-align:center; font-size:12px; color:var(--gray); margin-bottom:5px;"></div>
+    <div id="infoText" style="text-align:center; font-size:11px; color:var(--gray); margin-bottom:4px;"></div>
     <div class="progress-container"><div id="progressBar"></div></div>
     
     <div id="card">
@@ -143,41 +147,32 @@
         <button id="wrongBtn" class="ans-btn" onclick="processAnswer(false)">苦手 (A)</button>
         <button id="correctBtn" class="ans-btn" onclick="processAnswer(true)">正解 (Z)</button>
     </div>
-    <button onclick="finishTraining()" style="background:none; border:none; color:var(--gray); font-size:12px; cursor:pointer;">修行を中断する (Space)</button>
+    <button onclick="finishTraining()" style="background:none; border:none; color:var(--gray); font-size:11px; cursor:pointer;">中断 (Space)</button>
 </div>
 
 <div id="report">
     <div class="container" style="text-align:center;">
         <h1>修行完了</h1>
-        <div id="resultScore" style="font-size:28px; font-weight:900; color:var(--success);"></div>
-        <div id="timeResultDisplay"></div>
+        <div id="resultScore" style="font-size:24px; font-weight:900; color:var(--success); margin-bottom:10px;"></div>
+        <div id="timeResultDisplay" style="font-size:11px; color:var(--gray); margin-bottom:15px;"></div>
         
-        <div class="label">復習用（開始・終了時刻付き）</div>
-        <textarea id="wrongWordsArea" style="height:100px;" readonly></textarea>
-        <button class="copy-btn" onclick="copyText('wrongWordsArea')" style="width:100%; padding:12px; margin:10px 0; background:var(--accent); border:none; color:white; border-radius:12px; font-weight:bold;">単語リストをコピー</button>
+        <div class="label">
+            <span>間違えた単語</span>
+            <button class="copy-btn" onclick="copyText('wrongWordsArea', this)">コピー</button>
+        </div>
+        <textarea id="wrongWordsArea" style="height:100px; color:var(--danger);" readonly></textarea>
 
-        <div class="label">保存用暗記数値データ</div>
-        <textarea id="numericalArea" style="height:80px;" readonly></textarea>
-        <button class="copy-btn" onclick="copyText('numericalArea')" style="width:100%; padding:12px; background:var(--primary); border:none; color:white; border-radius:12px; font-weight:bold;">数値をコピー</button>
+        <div class="label" style="margin-top:15px;">
+            <span>保存用数値データ</span>
+            <button class="copy-btn" onclick="copyText('numericalArea', this)">コピー</button>
+        </div>
+        <textarea id="numericalArea" style="height:50px;" readonly></textarea>
 
-        <button class="main-btn" onclick="location.reload()" style="margin-top:20px; background:var(--gray);">トップに戻る</button>
+        <button class="main-btn" onclick="location.reload()" style="margin-top:20px; background:var(--gray);">トップへ戻る</button>
     </div>
 </div>
 
 <script>
-let zoomResetTimer;
-function autoResetZoom() {
-    clearTimeout(zoomResetTimer);
-    zoomResetTimer = setTimeout(() => {
-        const vp = document.querySelector('meta[name="viewport"]');
-        vp.setAttribute('content', 'width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no');
-        setTimeout(() => {
-            vp.setAttribute('content', 'width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes');
-        }, 50);
-    }, 1000);
-}
-window.addEventListener('touchend', autoResetZoom);
-
 const WORDS = [];
 const mastery = {};
 let ttsEnabled = true;
@@ -185,9 +180,7 @@ let queue = [];
 let results = [];
 let activeWord = null;
 let timers = { eng: null, jap: null };
-let importedIds = new Set();
 let sessionStart = null;
-let sessionEnd = null;
 
 window.onload = () => {
     const raw = document.getElementById('words-data').textContent.trim();
@@ -209,19 +202,8 @@ window.onload = () => {
 function adjustValue(id, delta) {
     const el = document.getElementById(id);
     let val = parseInt(el.value) || 0;
-    
-    if (id === 'rangeStart' || id === 'rangeEnd') {
-        if (delta > 0) {
-            val = Math.floor((val + 99) / 100) * 100 + 1;
-        } else {
-            val = Math.floor((val - 2) / 100) * 100 + 1;
-        }
-    } else {
-        val += delta;
-    }
-
+    val += delta;
     if (val < 1) val = 1;
-    if (id !== 'testLimit' && val > 2027) val = 2027;
     el.value = val;
 }
 
@@ -232,32 +214,33 @@ function toggleTTS() {
     btn.classList.toggle('active', ttsEnabled);
 }
 
+function copyText(id, btn) {
+    const area = document.getElementById(id);
+    area.select();
+    navigator.clipboard.writeText(area.value).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "完了";
+        setTimeout(() => btn.textContent = original, 1000);
+    });
+}
+
 function startTraining() {
     sessionStart = new Date();
     const startNum = parseInt(document.getElementById('rangeStart').value) || 1;
     const endNum = parseInt(document.getElementById('rangeEnd').value) || 2027;
     const testLimit = parseInt(document.getElementById('testLimit').value) || 100;
-    importedIds.clear();
 
     const imp = document.getElementById('importArea').value.trim();
     if (imp) {
         imp.split(/[,\n ]/).forEach(e => {
             if(!e.includes(':')) return;
             const [id, lv, iv] = e.split(':').map(Number);
-            if (mastery[id]) {
-                mastery[id] = { lv: lv || 0, iv: iv || 1 };
-                importedIds.add(id);
-            }
+            if (mastery[id]) mastery[id] = { lv: lv || 0, iv: iv || 1 };
         });
     }
 
-    let available = WORDS.filter(w => w.id >= startNum && w.id <= endNum && mastery[w.id].lv < 10);
-    available.sort((a, b) => {
-        const isAImp = importedIds.has(a.id) ? 0 : 1;
-        const isBImp = importedIds.has(b.id) ? 0 : 1;
-        if (isAImp !== isBImp) return isAImp - isBImp;
-        return (mastery[a.id].iv - mastery[a.id].lv) - (mastery[b.id].iv - mastery[b.id].lv) || Math.random() - 0.5;
-    });
+    let available = WORDS.filter(w => w.id >= startNum && w.id <= endNum);
+    available.sort((a, b) => (mastery[a.id].iv - mastery[a.id].lv) - (mastery[b.id].iv - mastery[b.id].lv) || Math.random() - 0.5);
 
     queue = available.slice(0, testLimit);
     if (queue.length === 0) return alert("修行対象が見つかりません。");
@@ -272,36 +255,37 @@ function nextWord() {
     clearAllTimers();
     if (queue.length === 0) return finishTraining();
     activeWord = queue.shift();
-    const currentNum = results.length + 1;
     const totalNum = results.length + queue.length + 1;
-    document.getElementById("infoText").innerHTML = `ID:${activeWord.id} (Lv:${mastery[activeWord.id].lv}) | ${currentNum} / ${totalNum} <span id="remainingCounter">(残り ${queue.length}語)</span>`;
+    document.getElementById("infoText").innerHTML = `ID:${activeWord.id} (Lv:${mastery[activeWord.id].lv}) | ${results.length + 1} / ${totalNum}`;
     document.getElementById("progressBar").style.width = `${(results.length / totalNum) * 100}%`;
     document.getElementById("englishWord").textContent = activeWord.en;
     const jaEl = document.getElementById("japaneseWord");
     jaEl.textContent = activeWord.ja;
     jaEl.classList.remove('visible');
-    if (ttsEnabled) speakChain(activeWord.en, activeWord.ja);
-    timers.eng = setTimeout(showAnswer, parseFloat(document.getElementById('engTime').value) * 1000);
+    
+    if (ttsEnabled) {
+        speakChain(activeWord.en, activeWord.ja);
+    } else {
+        timers.eng = setTimeout(showAnswer, parseFloat(document.getElementById('engTime').value) * 1000);
+    }
 }
 
 function speakChain(en, ja) {
     speechSynthesis.cancel();
-    const rate = parseFloat(document.getElementById('speechRate').value);
-    const gap = parseFloat(document.getElementById('voiceGap').value);
-    
+    const rateEn = parseFloat(document.getElementById('speechRateEn').value) || 1.5;
+    const rateJa = parseFloat(document.getElementById('speechRateJa').value) || 1.5;
     const voices = speechSynthesis.getVoices();
     const enVoice = voices.find(v => v.lang.startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
 
     const uEn = new SpeechSynthesisUtterance(en);
-    uEn.lang = 'en-US'; 
-    uEn.rate = rate;
+    uEn.lang = 'en-US'; uEn.rate = rateEn;
     if (enVoice) uEn.voice = enVoice;
 
     const uJa = new SpeechSynthesisUtterance(ja);
-    uJa.lang = 'ja-JP'; 
-    uJa.rate = rate;
+    uJa.lang = 'ja-JP'; uJa.rate = rateJa;
 
-    uEn.onend = () => { timers.voiceGap = setTimeout(() => { speechSynthesis.speak(uJa); }, gap * 1000); };
+    uEn.onend = () => { speechSynthesis.speak(uJa); };
+    uJa.onend = () => { showAnswer(); };
     speechSynthesis.speak(uEn);
 }
 
@@ -330,34 +314,25 @@ function clearAllTimers() {
     g.style.width = "0%";
 }
 
-function formatDate(date) {
-    if (!date) return "";
-    return date.toLocaleString('ja-JP', {year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit'});
-}
-
 function finishTraining() {
-    sessionEnd = new Date();
+    const sessionEnd = new Date();
     speechSynthesis.cancel();
     document.getElementById("app").classList.remove('active');
     document.getElementById("report").classList.add('active');
+    
+    const correct = results.filter(r => r.ok).length;
     const missed = results.filter(r => !r.ok);
-    const accuracy = ((results.filter(r => r.ok).length / results.length) * 100 || 0).toFixed(1);
+    const accuracy = ((correct / results.length) * 100 || 0).toFixed(1);
+    
+    document.getElementById("resultScore").textContent = `${correct} / ${results.length} (${accuracy}%)`;
+    
     const elapsed = Math.floor((sessionEnd - sessionStart) / 1000);
-    const minutes = Math.floor(elapsed / 60);
-    const seconds = elapsed % 60;
-    document.getElementById("resultScore").textContent = `${results.filter(r => r.ok).length} / ${results.length} (${accuracy}%)`;
-    const timeInfoText = `開始: ${formatDate(sessionStart)}<br>終了: ${formatDate(sessionEnd)}<br>経過時間: ${minutes}分${seconds}秒`;
-    document.getElementById("timeResultDisplay").innerHTML = timeInfoText;
-    const copyHeader = `【修行記録】\n開始: ${formatDate(sessionStart)}\n終了: ${formatDate(sessionEnd)}\n正解率: ${accuracy}%\n--------------------\n`;
-    document.getElementById("wrongWordsArea").value = copyHeader + Array.from(new Set(missed.map(m => m.raw))).join('\n');
-    document.getElementById("numericalArea").value = Object.keys(mastery).map(id => `${id}:${mastery[id].lv}:${mastery[id].iv}`).join(',');
-}
+    document.getElementById("timeResultDisplay").innerHTML = `経過時間: ${Math.floor(elapsed/60)}分${elapsed%60}秒`;
 
-function copyText(id) {
-    const el = document.getElementById(id);
-    el.select();
-    document.execCommand('copy');
-    alert("コピーしました");
+    document.getElementById("wrongWordsArea").value = missed.map(m => m.raw).join('\n');
+    document.getElementById("numericalArea").value = Object.keys(mastery)
+        .filter(id => mastery[id].lv !== 0 || mastery[id].iv !== 1)
+        .map(id => `${id}:${mastery[id].lv}:${mastery[id].iv}`).join(',');
 }
 
 document.onkeydown = (e) => {
@@ -370,6 +345,7 @@ document.onkeydown = (e) => {
 </script>
 
 <script type="text/plain" id="words-data">
+
 follow,～の後に続く/～に従う1
 consider,～を考慮する2
 increase,増える/～を増やす3

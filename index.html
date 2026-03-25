@@ -1,9 +1,16 @@
-<!DOCTYPE html>
+
+            const id = parseInt(m[2]);
+            idMap.set(id, { id, en: parts[0].trim(), ja: m[1], raw: line });
+        }
+    });
+    WORDS.length = 0;
+    WORDS.push(...Array.from(idMap.values()));
+    CURRENT_TOT<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes,viewport-fit=cover">
-    <title>システム英単語修行 V15.0 究極管理版</title>
+    <title>システム英単語修行 V15.1 究極管理版</title>
     <style>
         :root {
             --bg: #030712;
@@ -93,7 +100,7 @@
 
 <div id="setup" class="active">
     <div class="container">
-        <h1>システム英単語修行 V15.0</h1>
+        <h1>修行 V15.1 [究極管理]</h1>
 
         <div class="dashboard">
             <div class="db-bar">
@@ -118,7 +125,7 @@
                     <button class="io-btn" style="background:#4b5563;" onclick="clearImport()">消去</button>
                 </div>
             </div>
-            <textarea id="importArea" oninput="updateDashboard()" placeholder="ここに「保存用データ」を貼り付けて復元"></textarea>
+            <textarea id="importArea" oninput="updateDashboard()" placeholder="保存用データを貼り付け"></textarea>
         </div>
 
         <div class="range-box">
@@ -197,7 +204,7 @@ let enVoice = null;
 function setupVoices() {
     const fn = () => {
         const voices = window.speechSynthesis.getVoices();
-        enVoice = voices.find(v => v.name.includes('Google') && v.lang === 'en-US') || 
+        enVoice = voices.find(v => (v.name.includes('Google') || v.name.includes('Enhanced')) && v.lang === 'en-US') || 
                   voices.find(v => v.lang === 'en-US') || 
                   voices.find(v => v.lang.startsWith('en'));
     };
@@ -222,11 +229,6 @@ function loadData() {
     WORDS.length = 0;
     WORDS.push(...Array.from(idMap.values()));
     CURRENT_TOTAL = WORDS.length || 2027;
-
-    // 不具合修正：初期状態で終了IDをデータの最大数に合わせる
-    if(!localStorage.getItem('sisutan_config_v15')) {
-        document.getElementById('rangeEnd').value = CURRENT_TOTAL;
-    }
 }
 
 function updateDashboard() {
@@ -243,49 +245,37 @@ function updateDashboard() {
     counts.new = Math.max(0, CURRENT_TOTAL - (counts.a + counts.b + counts.c));
 
     ['a', 'b', 'c', 'new'].forEach(k => {
-        const pct = (counts[k] / CURRENT_TOTAL * 100).toFixed(1);
+        const val = counts[k];
+        const pct = (val / CURRENT_TOTAL * 100).toFixed(1);
         document.getElementById(`bar-${k}`).style.width = pct + '%';
-        document.getElementById(`val-${k}`).textContent = `${counts[k]} (${pct}%)`;
+        document.getElementById(`val-${k}`).textContent = `${val} (${pct}%)`;
     });
 }
 
-function saveAll() {
-    localStorage.setItem('sisutan_mastery_v15', JSON.stringify(mastery));
-    const config = {};
-    ['rangeStart', 'rangeEnd', 'rateEn', 'rateJa', 'limitTime', 'testLimit'].forEach(k => {
-        config[k] = document.getElementById(k).value;
-    });
-    localStorage.setItem('sisutan_config_v15', JSON.stringify(config));
+function speakEn(txt) {
+    window.speechSynthesis.cancel();
+    // 発音の邪魔になる非英字（記号など）を除去して発音をクリアにする
+    const cleanTxt = txt.replace(/[^a-zA-Z ]/g, "");
+    const ut = new SpeechSynthesisUtterance(cleanTxt);
+    ut.lang = 'en-US';
+    ut.rate = parseFloat(document.getElementById('rateEn').value) || 1.4;
+    if (enVoice) ut.voice = enVoice;
+    ut.onend = () => {
+        document.getElementById("japaneseWord").classList.add('visible');
+        speakJa(activeWord.ja);
+    };
+    window.speechSynthesis.speak(ut);
 }
 
-function adj(id, delta) {
-    const el = document.getElementById(id);
-    el.value = Math.max(1, parseInt(el.value) + delta);
-    if(id==='rangeEnd' && el.value > CURRENT_TOTAL) el.value = CURRENT_TOTAL;
-    saveAll(); updateDashboard();
+function speakJa(txt) {
+    // 読み上げのテンポを落とさないよう記号を消す
+    const cleanJa = txt.replace(/[～/]/g, "");
+    const ut = new SpeechSynthesisUtterance(cleanJa);
+    ut.lang = 'ja-JP';
+    ut.rate = parseFloat(document.getElementById('rateJa').value) || 1.5;
+    ut.onend = () => startStressTimer();
+    window.speechSynthesis.speak(ut);
 }
-
-function adjF(id, delta) {
-    const el = document.getElementById(id);
-    let v = parseFloat(el.value) || 0;
-    el.value = Math.max(0.1, Math.round((v + delta) * 10) / 10).toFixed(1);
-    saveAll();
-}
-
-window.onload = () => {
-    loadData();
-    const savedM = localStorage.getItem('sisutan_mastery_v15');
-    if (savedM) mastery = JSON.parse(savedM);
-    const savedC = localStorage.getItem('sisutan_config_v15');
-    if (savedC) {
-        const c = JSON.parse(savedC);
-        ['rangeStart', 'rangeEnd', 'rateEn', 'rateJa', 'limitTime', 'testLimit'].forEach(k => {
-            if (c[k]) document.getElementById(k).value = c[k];
-        });
-    }
-    setupVoices();
-    updateDashboard();
-};
 
 function startTraining() {
     if (WORDS.length === 0) loadData();
@@ -341,34 +331,13 @@ function nextWord() {
     
     const badge = document.getElementById("wordBadge");
     const status = mastery[activeWord.id];
-    badge.textContent = status ? status : "NEW";
+    badge.textContent = status ? status.toUpperCase() : "NEW";
     badge.style.color = status === 'c' ? "var(--danger)" : (status === 'b' ? "var(--accent)" : (status === 'a' ? "var(--gold)" : "var(--gray)"));
 
     document.getElementById("englishWord").textContent = activeWord.en;
     document.getElementById("japaneseWord").textContent = activeWord.ja;
     
     speakEn(activeWord.en);
-}
-
-function speakEn(txt) {
-    window.speechSynthesis.cancel();
-    const ut = new SpeechSynthesisUtterance(txt);
-    ut.lang = 'en-US';
-    ut.rate = parseFloat(document.getElementById('rateEn').value) || 1.4;
-    if (enVoice) ut.voice = enVoice;
-    ut.onend = () => {
-        document.getElementById("japaneseWord").classList.add('visible');
-        speakJa(activeWord.ja);
-    };
-    window.speechSynthesis.speak(ut);
-}
-
-function speakJa(txt) {
-    const ut = new SpeechSynthesisUtterance(txt);
-    ut.lang = 'ja-JP';
-    ut.rate = parseFloat(document.getElementById('rateJa').value) || 1.5;
-    ut.onend = () => startStressTimer();
-    window.speechSynthesis.speak(ut);
 }
 
 function startStressTimer() {
@@ -407,6 +376,29 @@ function finishTraining() {
     document.getElementById("numericalArea").value = Object.keys(mastery).sort((a, b) => a - b).map(id => `${id}${mastery[id]}`).join(',');
 }
 
+function saveAll() {
+    localStorage.setItem('sisutan_mastery_v15', JSON.stringify(mastery));
+    const config = {};
+    ['rangeStart', 'rangeEnd', 'rateEn', 'rateJa', 'limitTime', 'testLimit'].forEach(k => {
+        config[k] = document.getElementById(k).value;
+    });
+    localStorage.setItem('sisutan_config_v15', JSON.stringify(config));
+}
+
+function adj(id, delta) {
+    const el = document.getElementById(id);
+    el.value = Math.max(1, parseInt(el.value) + delta);
+    if(id==='rangeEnd' && el.value > CURRENT_TOTAL) el.value = CURRENT_TOTAL;
+    saveAll(); updateDashboard();
+}
+
+function adjF(id, delta) {
+    const el = document.getElementById(id);
+    let v = parseFloat(el.value) || 0;
+    el.value = Math.max(0.1, Math.round((v + delta) * 10) / 10).toFixed(1);
+    saveAll();
+}
+
 function quickCopy() {
     saveAll();
     const s = Object.keys(mastery).sort((a, b) => a - b).map(id => `${id}${mastery[id]}`).join(',');
@@ -439,6 +431,21 @@ function clearImport() {
     localStorage.removeItem('sisutan_mastery_v15'); updateDashboard();
 }
 
+window.onload = () => {
+    loadData();
+    const savedM = localStorage.getItem('sisutan_mastery_v15');
+    if (savedM) mastery = JSON.parse(savedM);
+    const savedC = localStorage.getItem('sisutan_config_v15');
+    if (savedC) {
+        const c = JSON.parse(savedC);
+        ['rangeStart', 'rangeEnd', 'rateEn', 'rateJa', 'limitTime', 'testLimit'].forEach(k => {
+            if (c[k]) document.getElementById(k).value = c[k];
+        });
+    }
+    setupVoices();
+    updateDashboard();
+};
+
 document.onkeydown = (e) => {
     if (!document.getElementById("app").classList.contains('active')) return;
     const k = e.key.toLowerCase();
@@ -448,6 +455,76 @@ document.onkeydown = (e) => {
 };
 </script>
 
+<script type="text/plain" id="words-raw-data">
+follow,従う/続く1
+consider,考慮する2
+increase,増やす/増える3
+expect,予期する/期待する4
+decide,決定する/決心する5
+develop,発達させる/開発する6
+provide,供給する/与える7
+continue,続ける/続く8
+include,含む9
+remain,ままでいる/残る10
+reach,達する/着く11
+allow,許可する/可能にする12
+force,強制する13
+offer,申し出る/提供する14
+realize,悟る/実現する15
+suggest,提案する/暗示す16
+require,必要とする17
+worry,心配する18
+wonder,疑問に思う/驚く19
+cost,費用がかかる20
+tend,傾向がある21
+depend,依存する/次第である22
+share,共有する/分担する23
+demand,要求する24
+support,支持する/援助する25
+hire,雇う26
+regard,みなす/考える27
+base,基づく28
+improve,向上させる/改善する29
+recognize,認める/識別する30
+notice,気づく/注目する31
+suppose,思う/仮定する32
+raise,上げる/育てる33
+prefer,好む34
+cheer,励ます/喝采する35
+suffer,経験する/苦しむ36
+describe,描写する/説明する37
+prevent,妨げる/予防する38
+reduce,減らす39
+mistake,間違える/誤解する40
+prepare,準備する41
+encourage,励ます/促進する42
+prove,判明する/証明する43
+treat,扱う/治療する44
+establish,設立する/確立する45
+relate,関係づける/話す46
+compare,比較する/例える47
+spread,広がる/広げる48
+refer,言及する/参照する49
+supply,供給する50
+gain,得る/増す51
+destroy,破壊する52
+apply,申し込む/適用する53
+seek,求める54
+search,捜す55
+claim,主張する/要求する56
+draw,描く/引く57
+refuse,拒む58
+respond,返答する/反応する59
+mention,言及する60
+judge,判断する/裁く61
+approach,接近する/取り組む62
+admit,認める/入れる63
+reflect,反映する/反射する64
+perform,行う/遂行する65
+bore,退屈させる66
+survive,生き残る67
+represent,表す/代表する68
+argue,主張する/論争する69
 <script type="text/plain" id="words-raw-data">
 follow,～の後に続く/～に従う1
 consider,～を考慮する2

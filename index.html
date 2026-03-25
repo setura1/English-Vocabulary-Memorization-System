@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-    <title>システム英単語修行 極限管理版V2.1</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes,viewport-fit=cover">
+    <title>システム英単語修行 極限管理版V2.2</title>
     <style>
         :root {
             --bg: #070b14;
@@ -16,7 +16,11 @@
             --accent: #7c3aed;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { margin: 0; width: 100%; height: 100%; background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); overflow: hidden; }
+        html, body { 
+            margin: 0; width: 100%; height: 100%; background: var(--bg); 
+            font-family: 'Inter', sans-serif; color: var(--text); 
+            overflow-x: hidden; touch-action: manipulation;
+        }
         
         #setup, #report { padding: 20px; height: 100vh; overflow-y: auto; display: none; }
         #setup.active, #report.active { display: block; }
@@ -28,9 +32,16 @@
         .label { font-size: 12px; font-weight: bold; color: var(--gray); margin: 15px 0 5px 4px; display: flex; justify-content: space-between; align-items: center; }
         
         .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-        .input-group { background: #1f2937; padding: 10px; border-radius: 12px; border: 1px solid #374151; }
+        .input-group { background: #1f2937; padding: 10px; border-radius: 12px; border: 1px solid #374151; transition: border-color 0.2s; }
+        .input-group:focus-within { border-color: var(--primary); }
         .input-group span { font-size: 10px; display: block; margin-bottom: 5px; color: #9ca3af; }
-        input { width: 100%; background: transparent; border: none; color: white; font-size: 16px; font-weight: bold; outline: none; }
+        
+        /* 数値入力をしやすく */
+        input { 
+            width: 100%; background: transparent; border: none; color: white; 
+            font-size: 18px; font-weight: bold; outline: none; 
+            -webkit-appearance: none; margin: 0;
+        }
 
         .range-box { background: #1e1b4b; padding: 15px; border-radius: 16px; border: 1px solid var(--accent); margin-bottom: 15px; }
         textarea { width: 100%; height: 60px; background: rgba(0,0,0,0.4); color: #94a3b8; border: 1px solid #374151; border-radius: 12px; padding: 10px; font-size: 11px; margin-top: 5px; outline: none; }
@@ -52,7 +63,7 @@
         #wrongBtn { background: var(--danger); }
         
         #gauge { position: absolute; bottom: 0; left: 0; height: 4px; background: var(--success); width: 0%; }
-        .toggle-btn { background: #374151; color: white; border: none; padding: 4px 8px; border-radius: 6px; font-size: 10px; cursor: pointer; }
+        .toggle-btn { background: #374151; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
         .toggle-btn.active { background: var(--success); }
 
         #remainingCounter { font-weight: bold; color: var(--accent); }
@@ -67,12 +78,12 @@
         <div class="range-box">
             <div class="label">修行範囲と出題数設定</div>
             <div class="param-grid">
-                <div class="input-group"><span>開始番号</span><input type="number" id="rangeStart" value="1" step="100"></div>
-                <div class="input-group"><span>終了番号</span><input type="number" id="rangeEnd" value="2027" step="100"></div>
+                <div class="input-group"><span>開始番号</span><input type="number" id="rangeStart" value="1" pattern="\d*"></div>
+                <div class="input-group"><span>終了番号</span><input type="number" id="rangeEnd" value="2027" pattern="\d*"></div>
             </div>
             <div class="input-group" style="background: rgba(255,255,255,0.1);">
-                <span>今回のテスト単語数（100語ずつ調整可）</span>
-                <input type="number" id="testCount" value="100" step="100">
+                <span>今回のテスト単語数</span>
+                <input type="number" id="testCount" value="100" pattern="\d*">
             </div>
         </div>
 
@@ -81,18 +92,18 @@
             <button id="ttsToggle" class="toggle-btn active" onclick="toggleTTS()">読み上げON</button>
         </div>
         <div class="param-grid">
-            <div class="input-group"><span>速度</span><input type="number" id="speechRate" value="1.6" step="0.1"></div>
-            <div class="input-group"><span>間隔(秒)</span><input type="number" id="voiceGap" value="0.0" step="0.1"></div>
+            <div class="input-group"><span>速度</span><input type="number" id="speechRate" value="1.6" step="0.1" inputmode="decimal"></div>
+            <div class="input-group"><span>間隔(秒)</span><input type="number" id="voiceGap" value="0.0" step="0.1" inputmode="decimal"></div>
         </div>
 
         <div class="label">修行時間調整(秒)</div>
         <div class="param-grid">
-            <div class="input-group"><span>想起待ち</span><input type="number" id="engTime" value="1.2" step="0.1"></div>
-            <div class="input-group"><span>解答制限</span><input type="number" id="japTime" value="1.5" step="0.1"></div>
+            <div class="input-group"><span>想起待ち</span><input type="number" id="engTime" value="1.2" step="0.1" inputmode="decimal"></div>
+            <div class="input-group"><span>解答制限</span><input type="number" id="japTime" value="1.5" step="0.1" inputmode="decimal"></div>
         </div>
 
-        <div class="label">暗記数値インポート（これに含まれる語を優先）</div>
-        <textarea id="importArea" placeholder="数値データをここに貼り付け"></textarea>
+        <div class="label">暗記数値インポート</div>
+        <textarea id="importArea" placeholder="数値データを貼り付け"></textarea>
 
         <button class="main-btn" onclick="startTraining()">修行開始</button>
     </div>
@@ -120,11 +131,11 @@
         <h1>修行完了</h1>
         <div id="resultScore" style="font-size:28px; font-weight:900; margin-bottom:20px;"></div>
         
-        <div class="label">復習用（間違えた単語）</div>
+        <div class="label">復習用</div>
         <textarea id="wrongWordsArea" style="height:120px;" readonly></textarea>
         <button class="copy-btn" onclick="copyText('wrongWordsArea')" style="width:100%; padding:12px; margin:10px 0; background:var(--accent); border:none; color:white; border-radius:12px; font-weight:bold;">単語をコピー</button>
 
-        <div class="label">保存用（暗記数値データ）</div>
+        <div class="label">数値保存</div>
         <textarea id="numericalArea" style="height:80px;" readonly></textarea>
         <button class="copy-btn" onclick="copyText('numericalArea')" style="width:100%; padding:12px; background:var(--primary); border:none; color:white; border-radius:12px; font-weight:bold;">数値をコピー</button>
 
@@ -133,6 +144,21 @@
 </div>
 
 <script>
+/* --- 自動ズームリセット機能 --- */
+let zoomTimeout;
+window.addEventListener('touchend', function() {
+    clearTimeout(zoomTimeout);
+    zoomTimeout = setTimeout(() => {
+        // 1秒後にメタタグをリセットしてズームを元に戻す
+        const viewport = document.querySelector('meta[name="viewport"]');
+        viewport.setAttribute('content', 'width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no');
+        // すぐに元の設定（拡大許可）に戻すことで表示を安定させる
+        setTimeout(() => {
+            viewport.setAttribute('content', 'width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes');
+        }, 100);
+    }, 1000);
+});
+
 const WORDS = [];
 const mastery = {};
 let ttsEnabled = true;
@@ -166,9 +192,9 @@ function toggleTTS() {
 }
 
 function startTraining() {
-    const startNum = parseInt(document.getElementById('rangeStart').value);
-    const endNum = parseInt(document.getElementById('rangeEnd').value);
-    const maxTest = parseInt(document.getElementById('testCount').value);
+    const startNum = parseInt(document.getElementById('rangeStart').value) || 1;
+    const endNum = parseInt(document.getElementById('rangeEnd').value) || 2027;
+    const maxTest = parseInt(document.getElementById('testCount').value) || 100;
     importedIds.clear();
 
     const imp = document.getElementById('importArea').value.trim();
@@ -209,7 +235,7 @@ function nextWord() {
     activeWord = queue.shift();
     const currentNum = results.length + 1;
     const totalNum = results.length + queue.length + 1;
-    const remainingNum = queue.length; // 残りの数
+    const remainingNum = queue.length;
 
     document.getElementById("infoText").innerHTML = 
         `ID:${activeWord.id} (Lv:${mastery[activeWord.id].lv}) | ${currentNum} / ${totalNum} <span id="remainingCounter">(残り ${remainingNum}語)</span>`;
@@ -231,11 +257,9 @@ function speakChain(en, ja) {
     const rate = parseFloat(document.getElementById('speechRate').value);
     const gap = parseFloat(document.getElementById('voiceGap').value);
     const uEn = new SpeechSynthesisUtterance(en);
-    uEn.lang = 'en-US';
-    uEn.rate = rate;
+    uEn.lang = 'en-US'; uEn.rate = rate;
     const uJa = new SpeechSynthesisUtterance(ja);
-    uJa.lang = 'ja-JP';
-    uJa.rate = rate;
+    uJa.lang = 'ja-JP'; uJa.rate = rate;
     uEn.onend = () => { timers.voiceGap = setTimeout(() => { speechSynthesis.speak(uJa); }, gap * 1000); };
     speechSynthesis.speak(uEn);
 }
@@ -297,6 +321,7 @@ document.onkeydown = (e) => {
     if (e.code === "Space") { e.preventDefault(); finishTraining(); }
 };
 </script>
+
 
 <script type="text/plain" id="words-data">
 follow,～の後に続く/～に従う1

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes,viewport-fit=cover">
-    <title>システム英単語修行 V13.0 究極管理版</title>
+    <title>システム英単語修行 V13.1 究極管理版</title>
     <style>
         :root {
             --bg: #030712;
@@ -16,11 +16,12 @@
             --gray: #6b7280;
             --accent: #8b5cf6;
             --gold: #fbbf24;
+            --silver: #94a3b8;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         html, body { 
             margin: 0; width: 100%; height: 100%; background: var(--bg); 
-            font-family: 'Inter', 'Hiragino Kaku Gothic ProN', sans-serif; color: var(--text); 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif; color: var(--text); 
             overflow-x: hidden; touch-action: manipulation;
         }
         
@@ -29,68 +30,69 @@
         #app { display: none; position: fixed; inset: 0; background: var(--bg); flex-direction: column; padding: 12px; z-index: 100; }
         #app.active { display: flex; }
 
-        .container { max-width: 600px; margin: 0 auto; background: var(--container); border-radius: 28px; padding: 20px; border: 1px solid #374151; }
-        h1 { font-size: 18px; text-align: center; margin: 0 0 15px 0; color: var(--primary); font-weight: 900; letter-spacing: 1px; }
+        .container { max-width: 600px; margin: 0 auto; background: var(--container); border-radius: 28px; padding: 24px; border: 1px solid #374151; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        h1 { font-size: 22px; text-align: center; margin: 0 0 20px 0; color: var(--primary); font-weight: 900; letter-spacing: 1px; }
 
-        .dashboard { background: #1f2937; border-radius: 20px; padding: 15px; margin-bottom: 20px; border: 1px solid #374151; }
-        .db-bar { height: 12px; display: flex; border-radius: 6px; overflow: hidden; background: #111827; margin-bottom: 10px; }
-        .db-seg { height: 100%; transition: width 0.5s ease; }
+        /* ダッシュボード */
+        .dashboard { background: rgba(31, 41, 55, 0.5); border-radius: 24px; padding: 18px; margin-bottom: 24px; border: 1px solid #374151; }
+        .db-bar { height: 14px; display: flex; border-radius: 7px; overflow: hidden; background: #030712; margin-bottom: 12px; }
+        .db-seg { height: 100%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
         .seg-a { background: var(--gold); }
         .seg-b { background: var(--accent); }
         .seg-c { background: var(--danger); }
-        .seg-new { background: #374151; }
-        .db-legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .seg-new { background: #4b5563; }
+        .db-legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
         .lg-item { text-align: center; }
-        .lg-label { font-size: 9px; color: var(--gray); display: block; }
-        .lg-val { font-size: 12px; font-weight: 900; }
+        .lg-label { font-size: 10px; color: var(--gray); display: block; margin-bottom: 2px; }
+        .lg-val { font-size: 13px; font-weight: 900; font-variant-numeric: tabular-nums; }
 
-        .label { font-size: 10px; font-weight: bold; color: var(--gray); margin: 12px 0 6px 4px; display: flex; justify-content: space-between; align-items: center; }
-        .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+        .label { font-size: 11px; font-weight: 800; color: var(--silver); margin: 16px 0 6px 4px; display: flex; justify-content: space-between; align-items: center; }
+        .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
         @media (max-width: 420px) { .param-grid { grid-template-columns: 1fr; } }
 
-        .input-group { background: #1f2937; padding: 10px; border-radius: 16px; border: 1px solid #374151; }
-        .input-group span { font-size: 9px; margin-bottom: 4px; color: #9ca3af; display: block; }
+        .input-group { background: #1f2937; padding: 12px; border-radius: 18px; border: 1px solid #374151; }
+        .input-group span { font-size: 10px; margin-bottom: 6px; color: #9ca3af; display: block; font-weight: bold; }
         
-        .adj-container { display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .adj-btn { background: #4b5563; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer; min-width: 40px; }
+        .adj-container { display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .adj-btn { background: #334155; color: white; border: none; padding: 10px 14px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; min-width: 44px; }
         .adj-btn:active { transform: scale(0.9); background: var(--primary); }
 
-        input { width: 65px; background: transparent; border: none; color: white; font-size: 18px; font-weight: bold; text-align: center; }
+        input { width: 70px; background: transparent; border: none; color: white; font-size: 20px; font-weight: 900; text-align: center; }
 
-        .range-box { background: #1e1b4b; padding: 15px; border-radius: 20px; border: 1px solid var(--accent); margin-bottom: 15px; }
-        textarea { width: 100%; height: 50px; background: rgba(0,0,0,0.4); color: #94a3b8; border: 1px solid #374151; border-radius: 12px; padding: 10px; font-size: 11px; margin-top: 5px; outline: none; resize: none; word-break: break-all; }
+        .range-box { background: linear-gradient(145deg, #1e1b4b, #111827); padding: 18px; border-radius: 24px; border: 1px solid var(--accent); margin-bottom: 18px; }
+        textarea { width: 100%; height: 55px; background: rgba(0,0,0,0.4); color: #94a3b8; border: 1px solid #374151; border-radius: 14px; padding: 12px; font-size: 12px; margin-top: 6px; outline: none; resize: none; word-break: break-all; }
 
-        button.main-btn { width: 100%; height: 60px; border: none; border-radius: 20px; font-size: 20px; font-weight: 900; cursor: pointer; background: var(--primary); color: white; transition: 0.2s; box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.5); }
-        button.main-btn:active { transform: scale(0.98); }
+        button.main-btn { width: 100%; height: 64px; border: none; border-radius: 22px; font-size: 22px; font-weight: 900; cursor: pointer; background: var(--primary); color: white; transition: 0.2s; box-shadow: 0 12px 24px -6px rgba(59, 130, 246, 0.5); }
+        button.main-btn:active { transform: scale(0.97); }
 
-        .sm-btn { background: var(--gray); color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 10px; cursor: pointer; font-weight: bold; }
-        .io-btn { background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: bold; cursor: pointer; }
+        .sm-btn { background: #374151; color: white; border: none; padding: 7px 14px; border-radius: 10px; font-size: 11px; cursor: pointer; font-weight: 800; }
+        .io-btn { background: var(--accent); color: white; border: none; padding: 7px 14px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer; }
         
-        #card { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; gap: 10px; background: var(--card-bg); border-radius: 40px; margin: 10px 0; position: relative; border: 1px solid #374151; }
-        #wordBadge { position: absolute; top: 30px; font-size: 18px; font-weight: 900; padding: 4px 16px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
-        #englishWord { font-size: 40px; font-weight: 900; line-height: 1.1; color: var(--text); word-break: break-word; max-width: 95%; margin-top: 20px; }
-        #japaneseWord { font-size: 22px; color: var(--primary); font-weight: bold; visibility: hidden; min-height: 1.5em; margin-top: 10px; }
+        #card { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; gap: 15px; background: var(--card-bg); border-radius: 48px; margin: 10px 0; position: relative; border: 1px solid #374151; box-shadow: inset 0 0 30px rgba(0,0,0,0.3); }
+        #wordBadge { position: absolute; top: 40px; font-size: 24px; font-weight: 900; padding: 6px 20px; border-radius: 16px; background: rgba(0,0,0,0.3); border: 2px solid currentColor; }
+        #englishWord { font-size: 46px; font-weight: 900; line-height: 1.1; color: var(--text); word-break: break-word; max-width: 95%; margin-top: 30px; letter-spacing: -1px; }
+        #japaneseWord { font-size: 26px; color: var(--primary); font-weight: 800; visibility: hidden; min-height: 1.5em; margin-top: 15px; }
         #japaneseWord.visible { visibility: visible; }
         
-        #timerTrack { width: 100%; height: 8px; background: #111827; margin-top: 20px; border-radius: 10px; overflow: hidden; opacity: 0; }
+        #timerTrack { width: 100%; height: 10px; background: #030712; margin-top: 25px; border-radius: 10px; overflow: hidden; opacity: 0; }
         #timerTrack.active { opacity: 1; }
         #timerBar { height: 100%; background: var(--danger); width: 0%; }
 
-        .progress-container { width: 100%; height: 6px; background: #1f2937; border-radius: 10px; overflow: hidden; margin: 8px 0; }
-        #progressBar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s linear; }
+        .progress-container { width: 100%; height: 8px; background: #1f2937; border-radius: 10px; overflow: hidden; margin: 8px 0; }
+        #progressBar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         
-        .ans-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-bottom: 10px; }
-        .ans-btn { height: 85px; border: none; border-radius: 28px; color: white; font-size: 24px; font-weight: 900; cursor: pointer; transition: 0.1s; }
-        .ans-btn:active { transform: scale(0.95); }
-        #correctBtn { background: var(--success); }
-        #wrongBtn { background: var(--danger); }
+        .ans-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; width: 100%; margin-bottom: 12px; }
+        .ans-btn { height: 90px; border: none; border-radius: 32px; color: white; font-size: 26px; font-weight: 900; cursor: pointer; transition: 0.15s; }
+        .ans-btn:active { transform: scale(0.94); }
+        #correctBtn { background: var(--success); box-shadow: 0 8px 20px -5px rgba(16, 185, 129, 0.4); }
+        #wrongBtn { background: var(--danger); box-shadow: 0 8px 20px -5px rgba(239, 68, 68, 0.4); }
     </style>
 </head>
 <body>
 
 <div id="setup" class="active">
     <div class="container">
-        <h1>システム英単語修行 V13.0</h1>
+        <h1>システム英単語修行 V13.1</h1>
 
         <div class="dashboard">
             <div class="db-bar">
@@ -103,19 +105,19 @@
                 <div class="lg-item"><span class="lg-label">完了(a)</span><span id="val-a" class="lg-val" style="color:var(--gold)">0</span></div>
                 <div class="lg-item"><span class="lg-label">継続(b)</span><span id="val-b" class="lg-val" style="color:var(--accent)">0</span></div>
                 <div class="lg-item"><span class="lg-label">苦手(c)</span><span id="val-c" class="lg-val" style="color:var(--danger)">0</span></div>
-                <div class="lg-item"><span class="lg-label">未着手</span><span id="val-new" class="lg-val" style="color:var(--gray)">0</span></div>
+                <div class="lg-item"><span class="lg-label">未着手</span><span id="val-new" class="lg-val" style="color:var(--silver)">0</span></div>
             </div>
         </div>
         
         <div class="input-group" style="margin-bottom:15px; background: #1e1b4b;">
             <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom:6px;">
-                <span style="color:#fff">データ復元 / 出力</span>
+                <span style="color:#fff">データ復元 / 書き出し</span>
                 <div style="display:flex; gap:6px;">
                     <button class="io-btn" onclick="exportData()">出す</button>
-                    <button class="io-btn" style="background:var(--gray);" onclick="clearImport()">消去</button>
+                    <button class="io-btn" style="background:#4b5563;" onclick="clearImport()">消す</button>
                 </div>
             </div>
-            <textarea id="importArea" oninput="updateDashboard()" placeholder="データを貼り付けて上書き復元"></textarea>
+            <textarea id="importArea" oninput="updateDashboard()" placeholder="ここに「保存用データ」を貼り付けて復元"></textarea>
         </div>
 
         <div class="range-box">
@@ -136,7 +138,7 @@
             </div>
         </div>
 
-        <div class="label">音声・速度設定</div>
+        <div class="label">修行テンポ設定</div>
         <div class="param-grid">
             <div class="input-group"><span>英語速度</span><input type="number" id="rateEn" value="1.4" step="0.1"></div>
             <div class="input-group"><span>日本語速度</span><input type="number" id="rateJa" value="1.5" step="0.1"></div>
@@ -164,24 +166,25 @@
         <button id="correctBtn" class="ans-btn" onclick="processAnswer(true)">わかる (Z)</button>
     </div>
     <div style="display:flex; justify-content: space-between; padding: 5px 10px;">
-        <button onclick="finishTraining()" style="background:none; border:none; color:var(--gray); font-size:11px; font-weight:bold;">中断 (Space)</button>
-        <button onclick="quickCopy()" id="midBtn" class="sm-btn">進捗をコピー</button>
+        <button onclick="finishTraining()" style="background:none; border:none; color:var(--gray); font-size:12px; font-weight:bold; cursor:pointer;">中断 (Space)</button>
+        <button onclick="quickCopy()" id="midBtn" class="sm-btn">進捗保存コピー</button>
     </div>
 </div>
 
 <div id="report">
     <div class="container" style="text-align:center;">
         <h1>修行完了</h1>
-        <div id="resultScore" style="font-size:26px; font-weight:900; color:var(--success); margin-bottom:20px;"></div>
+        <div id="resultScore" style="font-size:32px; font-weight:900; color:var(--success); margin-bottom:20px;"></div>
         <div class="label"><span>今回間違えた単語</span><button class="sm-btn" onclick="copyText('wrongListArea', this)">コピー</button></div>
-        <textarea id="wrongListArea" style="height:100px; color:var(--danger);" readonly></textarea>
-        <div class="label" style="margin-top:15px;"><span>保存用数値データ</span><button class="sm-btn" onclick="copyText('numericalArea', this)">コピー</button></div>
-        <textarea id="numericalArea" readonly></textarea>
-        <button class="main-btn" onclick="location.reload()" style="margin-top:25px; background:var(--gray);">トップへ戻る</button>
+        <textarea id="wrongListArea" style="height:110px; color:var(--danger); border-color:var(--danger);" readonly></textarea>
+        <div class="label" style="margin-top:20px;"><span>保存用数値データ</span><button class="sm-btn" onclick="copyText('numericalArea', this)">コピー</button></div>
+        <textarea id="numericalArea" style="height:70px;" readonly></textarea>
+        <button class="main-btn" onclick="location.reload()" style="margin-top:30px; background:var(--gray);">トップへ戻る</button>
     </div>
 </div>
 
 <script>
+const TOTAL_WORDS_COUNT = 2027;
 const WORDS = [];
 let mastery = {};
 let queue = [];
@@ -189,12 +192,28 @@ let results = [];
 let activeWord = null;
 let stressTimer = null;
 let enVoice = null;
-let totalWordsInApp = 2027;
+
+// 音声品質向上
+function setupVoices() {
+    const fn = () => {
+        const voices = window.speechSynthesis.getVoices();
+        // プレミアム音声の優先順位サーチ
+        enVoice = voices.find(v => v.name.includes('Google') && v.lang === 'en-US') || 
+                  voices.find(v => v.name.includes('Premium') && v.lang.startsWith('en')) ||
+                  voices.find(v => v.name.includes('Natural') && v.lang.startsWith('en')) ||
+                  voices.find(v => v.lang === 'en-US') || 
+                  voices.find(v => v.lang.startsWith('en'));
+    };
+    fn();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = fn;
+    }
+}
 
 window.onload = () => {
-    const savedM = localStorage.getItem('sisutan_mastery_v13');
+    const savedM = localStorage.getItem('sisutan_mastery_v13_1');
     if (savedM) mastery = JSON.parse(savedM);
-    const savedC = localStorage.getItem('sisutan_config_v13');
+    const savedC = localStorage.getItem('sisutan_config_v13_1');
     if (savedC) {
         const c = JSON.parse(savedC);
         ['rangeStart', 'rangeEnd', 'rateEn', 'rateJa', 'limitTime', 'testLimit'].forEach(k => {
@@ -206,17 +225,6 @@ window.onload = () => {
     updateDashboard();
 };
 
-function setupVoices() {
-    const fn = () => {
-        const voices = window.speechSynthesis.getVoices();
-        enVoice = voices.find(v => v.name === 'Google US English') || 
-                  voices.find(v => v.lang === 'en-US' && v.name.includes('Natural')) ||
-                  voices.find(v => v.lang === 'en-US') || voices.find(v => v.lang.startsWith('en'));
-    };
-    fn();
-    window.speechSynthesis.onvoiceschanged = fn;
-}
-
 function loadData() {
     const dataNode = document.getElementById('words-raw-data');
     if (!dataNode) return;
@@ -226,11 +234,13 @@ function loadData() {
         const parts = line.split(',');
         if (parts.length < 2) return;
         const m = parts[1].trim().match(/^(.*?)(\d+)$/);
-        if (m) idMap.set(parseInt(m[2]), { id: parseInt(m[2]), en: parts[0].trim(), ja: m[1], raw: line });
+        if (m) {
+            const id = parseInt(m[2]);
+            idMap.set(id, { id, en: parts[0].trim(), ja: m[1], raw: line });
+        }
     });
     WORDS.length = 0;
     WORDS.push(...Array.from(idMap.values()));
-    totalWordsInApp = WORDS.length || 2027;
 }
 
 function updateDashboard() {
@@ -244,27 +254,28 @@ function updateDashboard() {
     }
     const counts = { a: 0, b: 0, c: 0, new: 0 };
     Object.values(tempMastery).forEach(v => counts[v]++);
-    counts.new = totalWordsInApp - (counts.a + counts.b + counts.c);
+    counts.new = Math.max(0, TOTAL_WORDS_COUNT - (counts.a + counts.b + counts.c));
+
     ['a', 'b', 'c', 'new'].forEach(k => {
-        const pct = (counts[k] / totalWordsInApp * 100).toFixed(1);
+        const pct = (counts[k] / TOTAL_WORDS_COUNT * 100).toFixed(1);
         document.getElementById(`bar-${k}`).style.width = pct + '%';
         document.getElementById(`val-${k}`).textContent = `${counts[k]} (${pct}%)`;
     });
 }
 
 function saveAll() {
-    localStorage.setItem('sisutan_mastery_v13', JSON.stringify(mastery));
+    localStorage.setItem('sisutan_mastery_v13_1', JSON.stringify(mastery));
     const config = {};
     ['rangeStart', 'rangeEnd', 'rateEn', 'rateJa', 'limitTime', 'testLimit'].forEach(k => {
         config[k] = document.getElementById(k).value;
     });
-    localStorage.setItem('sisutan_config_v13', JSON.stringify(config));
+    localStorage.setItem('sisutan_config_v13_1', JSON.stringify(config));
 }
 
 function adj(id, delta) {
     const el = document.getElementById(id);
     el.value = Math.max(1, parseInt(el.value) + delta);
-    if((id==='rangeEnd' || id==='rangeStart') && el.value > totalWordsInApp) el.value = totalWordsInApp;
+    if(id==='rangeEnd' && el.value > 2027) el.value = 2027;
     saveAll(); updateDashboard();
 }
 
@@ -285,9 +296,11 @@ function startTraining() {
         });
     }
     saveAll();
+    
     const start = parseInt(document.getElementById('rangeStart').value);
     const end = parseInt(document.getElementById('rangeEnd').value);
     const limit = parseInt(document.getElementById('testLimit').value);
+    
     let available = WORDS.filter(w => w.id >= start && w.id <= end);
     const priority = (id) => {
         const s = mastery[id];
@@ -298,6 +311,7 @@ function startTraining() {
     };
     available.sort((x, y) => priority(x.id) - priority(y.id) || Math.random() - 0.5);
     queue = available.slice(0, limit);
+
     if (queue.length === 0) return alert("対象がありません");
     results = [];
     document.getElementById("setup").classList.remove('active');
@@ -314,17 +328,23 @@ function nextWord() {
     bar.style.transition = "none";
     bar.style.width = "0%";
     jaEl.classList.remove('visible');
+    
     if (queue.length === 0) return finishTraining();
     activeWord = queue.shift();
-    const total = results.length + queue.length + 1;
-    document.getElementById("infoText").textContent = `ID:${activeWord.id} | ${results.length+1} / ${total}`;
-    document.getElementById("progressBar").style.width = `${(results.length / total) * 100}%`;
+    
+    const currentNum = results.length + 1;
+    const totalNum = results.length + queue.length + 1;
+    document.getElementById("infoText").textContent = `ID:${activeWord.id} | ${currentNum} / ${totalNum}`;
+    document.getElementById("progressBar").style.width = `${(results.length / totalNum) * 100}%`;
+    
     const badge = document.getElementById("wordBadge");
     const status = mastery[activeWord.id];
     badge.textContent = status ? status : "NEW";
-    badge.style.color = status === 'c' ? "var(--danger)" : (status === 'b' ? "var(--accent)" : (status === 'a' ? "var(--gold)" : "var(--gray)"));
+    badge.style.color = status === 'c' ? "var(--danger)" : (status === 'b' ? "var(--accent)" : (status === 'a' ? "var(--gold)" : "var(--silver)"));
+
     document.getElementById("englishWord").textContent = activeWord.en;
     document.getElementById("japaneseWord").textContent = activeWord.ja;
+    
     speakEn(activeWord.en);
 }
 
@@ -380,7 +400,8 @@ function finishTraining() {
     document.getElementById("report").classList.add('active');
     const okCount = results.filter(r => r.ok).length;
     const missed = results.filter(r => !r.ok);
-    document.getElementById("resultScore").textContent = `${okCount} / ${results.length} (${((okCount/results.length)*100||0).toFixed(1)}%)`;
+    const accuracy = ((okCount / results.length) * 100 || 0).toFixed(1);
+    document.getElementById("resultScore").textContent = `${okCount} / ${results.length} (${accuracy}%)`;
     document.getElementById("wrongListArea").value = missed.map(m => m.raw).join('\n');
     document.getElementById("numericalArea").value = Object.keys(mastery).sort((a, b) => a - b).map(id => `${id}${mastery[id]}`).join(',');
 }
@@ -414,7 +435,7 @@ function exportData() {
 function clearImport() {
     if(!confirm("リセットしますか？")) return;
     mastery = {}; document.getElementById('importArea').value = '';
-    localStorage.removeItem('sisutan_mastery_v13'); updateDashboard();
+    localStorage.removeItem('sisutan_mastery_v13_1'); updateDashboard();
 }
 
 document.onkeydown = (e) => {
@@ -667,7 +688,7 @@ delight,大喜び237
 desert,砂漠238
 background,背景、生い立ち、経歴239
 trend,傾向240
-vote,投票241
+vote,投票する241
 impact,影響、衝撃242
 institution,機関、制度243
 interaction,交流244
@@ -1074,7 +1095,7 @@ oblige,～に強いる644
 qualify,Aに適任である645
 invest,（金）を投資する646
 grasp,～を理解する647
-collapse,崩壊する648
+collapse,崩壊する 648
 overlook,～を見落とす、～を見逃す649
 accuse,～を非難する650
 frustrate,〈人〉を欲求不満にさせる651
@@ -1184,7 +1205,7 @@ version,型、...版、翻訳、説明754
 parallel,類似(物)、匹敵するもの755
 horizon,地平線756
 acquaintance,知人757
-burden,重荷758
+burden,重荷 758
 basis,基礎、根拠、方式、やり方759
 poison,毒760
 constitution,憲法761
@@ -1325,1135 +1346,1135 @@ cooperate,協力する895
 inherit,～を受け継ぐ896
 unite,～を団結させる897
 leap,跳ぶ898
-exaggerate,～を誇張する899
-conquer,～を征服する900
-melt,溶ける901
-invade,～に侵入する902
-modify,～を修正する903
-scatter,～をばらまく904
-undergo,～を経験する905
-evaluate,～を評価する906
-bend,身をかがめる907
-derive,由来する908
-screaming,悲鳴をあげる909
-gaze,見つめる910
-pray,祈る911
-polish,～を磨く912
-classify,分類する913
-assert,～と主張する914
-grab,～をつかむ915
-fold,～を折りたたむ916
-sweep,～を掃く917
-whisper,ささやく918
-imitate,～をまねる919
-stare,じっと見る920
-emphasize,～を強調する921
-rid,～を取り除く922
-pour,～を注ぐ923
-vanish,消える924
-restore,～を修復する925
-deserve,当然だ926
-laboratory,研究所927
-conference,会議928
-continent,大陸929
-insurance,保険930
-crew,乗組員たち931
-poverty,貧乏932
-shortage,不足933
-affair,情勢934
-exception,例外935
-wage,賃金936
-wisdom,知恵937
-tax,税金938
-evolution,進化939
-barrier,壁940
-category,範ちゅう941
-unit,単位942
-reputation,評判943
-virtue,美徳944
-courage,勇気945
-sympathy,同情946
-union,組合947
-civilization,文明948
-volume,冊949
-blossom,花950
-era,時代951
-dispute,紛争952
-tourism,観光953
-mankind,人類954
-murder,殺人955
-landscape,風景956
-destination,目的地957
-tale,話958
-reform,改革959
-muscle,筋肉960
-prospect,見通し961
-corporation,企業962
-colony,植民地963
-quarrel,口論964
-profession,職業965
-aspect,側面966
-pause,休止967
-conflict,対立968
-privilege,特権969
-prosperity,繁栄970
-genius,天才971
-seed,種972
-symptom,症状973
-merit,長所974
-layer,層975
-clue,手がかり976
-circumstances,状況977
-district,地区978
-prison,刑務所979
-companion,仲間980
-executive,重役981
-justice,正義982
-procedure,手続き983
-ray,光線984
-heaven,天国985
-luxury,贅沢986
-oxygen,酸素987
-fund,資金988
-theme,主題、テーマ989
-boundary,境界990
-ambition,熱望991
-forecast,予報992
-psychology,心理学993
-labor,労働994
-committee,委員会995
-physician,医者996
-philosophy,哲学997
-affection,愛情998
-candidate,候補999
-bomb,爆弾1000
-priority,優先1001
-obstacle,障害1002
-appetite,食欲1003
-tension,緊張1004
-tribe,部族1005
-budget,予算1006
-campaign,運動、キャンペーン1007
-sorrow,悲しみ1008
-satellite,衛星1009
-insight,洞察1010
-cough,せき1011
-fate,運命1012
-scheme,計画1013
-insult,侮辱1014
-inhabitant,住民1015
-fossil,化石1016
-motive,動機1017
-instinct,本能1018
-legend,伝説1019
-empire,帝国1020
-suburb,郊外1021
-architecture,建築1022
-passion,情熱1023
-cancer,ガン1024
-logic,論理1025
-dozen,ダース1026
-harvest,収穫1027
-ingredient,材料1028
-hypothesis,仮説1029
-voyage,航海1030
-editor,編集者1031
-option,選択の自由1032
-hemisphere,半球1033
-mechanism,仕組み1034
-anthropologist,人類学者1035
-tragedy,悲劇1036
-antibiotic,抗生物質1037
-fare,運賃1038
-debt,借金1039
-curriculum,教育課程1040
-component,構成要素1041
-wheat,小麦1042
-usage,語法1043
-castle,城1044
-famine,飢饉1045
-extinction,絶滅1046
-purse,財布1047
-folk,民族1048
-explosion,爆発1049
-portion,部分1050
-organism,生物1051
-merchant,商人1052
-myth,神話1053
-incident,出来事1054
-wildlife,野生生物1055
-congress,議会1056
-bay,湾1057
-penalty,刑1058
-heritage,遺産1059
-diversity,多様性1060
-thumb,親指1061
-geography,地理1062
-factor,要因1063
-discrimination,差別1064
-virus,ウイルス1065
-statue,像1066
-priest,神父1067
-pioneer,先駆者1068
-trait,特徴1069
-bond,きずな1070
-grocery,食料品1071
-secretary,秘書1072
-dialect,方言1073
-astronomy,天文学1074
-youngster,子供1075
-substance,物質1076
-finding,発見1077
-strategy,戦略1078
-lung,肺1079
-opponent,敵1080
-ritual,儀式1081
-outcome,結果1082
-conservation,環境保護1083
-mammal,哺乳類1084
-telescope,望遠鏡1085
-refugee,難民1086
-code,規則1087
-flavor,風味1088
-particle,粒子1089
-nursing,看護1090
-suicide,自殺1091
-habitat,生息地1092
-bullying,いじめ1093
-dinosaur,恐竜1094
-council,議会1095
-gender,性別1096
-surgery,手術1097
-innovation,革新1098
-protein,タンパク質1099
-nutrition,栄養1100
-disaster,災害1101
-emission,排出1102
-ape,類人猿1103
-molecule,分子1104
-sweat,汗1105
-transplant,移植1106
-species,種1107
-tip,先1108
-cattle,牛1109
-density,密度1110
-concept,概念1111
-pale,青白い1112
-precious,貴重な1113
-loyal,忠実な1114
-isolated,孤立している1115
-generous,気前のよい1116
-tropical,熱帯1117
-reluctant,したがらない1118
-vague,漠然とした1119
-vast,広大な1120
-numerous,たくさんの1121
-rural,田舎の1122
-widespread,広まっている1123
-complicated,複雑な1124
-visible,目に見える1125
-raw,生の1126
-remote,へんぴな1127
-urgent,緊急の1128
-silly,ばかな1129
-striking,いちじるしい1130
-adequate,十分な1131
-extraordinary,並外れた1132
-odd,おかしな1133
-abstract,抽象的な1134
-mutual,相互の1135
-excessive,過度の1136
-ashamed,恥ずかしい1137
-tremendous,とてつもない1138
-inevitable,避けられない1139
-pure,純1140
-stable,安定した1141
-indifferent,無関心だ1142
-aggressive,攻撃的な1143
-ultimate,究極の1144
-shy,内気な1145
-solar,太陽1146
-profound,深い1147
-subtle,微妙な1148
-conservative,保守1149
-brave,勇敢な1150
-intense,強烈な1151
-alcoholic,アルコールの1152
-manual,手を使う1153
-cruel,残酷な1154
-rational,理性的な1155
-initial,最初の1156
-immune,免疫1157
-linguistic,言語の1158
-crucial,重大な1159
-verbal,言葉による1160
-optimistic,楽観的な1161
-flexible,柔軟な1162
-grateful,感謝している1163
-lively,生き生きとした1164
-overwhelming,圧倒的な1165
-abundant,豊富な1166
-selfish,利己的な1167
-ugly,みにくい1168
-racial,人種の1169
-prominent,有名な1170
-controversial,物議を呼ぶ1171
-federal,連邦の1172
-ridiculous,ばかげた1173
-imaginary,架空の1174
-harsh,厳しい1175
-random,無作為な1176
-adolescent,思春期の1177
-up-to-date,最新の1178
-liberal,自由主義の1179
-prior,前の1180
-moderate,適度な1181
-fluent,流ちょうな1182
-elaborate,手の込んだ1183
-incredible,信じられない1184
-radical,根本的な1185
-acid,酸性の1186
-deaf,耳が不自由な1187
-medieval,中世の1188
-ecological,生態1189
-slight,少しの1190
-ignorant,無知な1191
-cognitive,認知1192
-absolutely,絶対に1193
-virtually,ほとんど1194
-somewhat,多少1195
-merely,単に1196
-literally,文字通り1197
-seemingly,一見1198
-regardless,関係なく1199
-thoroughly,徹底的に1200
-submit,Aに服従する、提出する1201
-tempt,誘惑する、する気にさせる1202
-resign,辞職する1203
-conform,従う1204
-confine,限定する1205
-assemble,組み立てる1206
-dedicate,ささげる1207
-advocate,主張する1208
-thrive,繁栄する1209
-provoke,引き起こす1210
-dictate,命じる、要求する、決定する1211
-exploit,利用する、開発する1212
-surrender,降伏する1213
-reproduce,再生する、複製する、繁殖する[させる]1214
-acknowledge,認める1215
-swell,ふくらむ1216
-shed,落とす1217
-wind,曲がる1218
-cite,引き合いに出す1219
-digest,消化する1220
-skip,とばす、抜かす1221
-bind,縛る、束縛する1222
-dissolve,溶解する1223
-implement,実行する1224
-steer,操縦する1225
-congratulate,祝福する1226
-designate,指定する1227
-violate,破る、違反する1228
-presume,推定する、思う1229
-recruit,（新人を）入れる1230
-coincide,同時に起きる、重なる1231
-enforce,施行する1232
-displace,とってかわる、故郷から追い出す1233
-shrink,縮む、縮ませる、減る1234
-betray,裏切る、もらす1235
-comprise,構成される、構成する、占める1236
-indulge,ふける1237
-penetrate,入り込む1238
-devastate,壊滅させる1239
-plunge,突っ込む1240
-bounce,はね返る1241
-contradict,矛盾する1242
-prescribe,処方する1243
-oppress,しいたげる1244
-cherish,胸に抱く1245
-illuminate,照らす、解明する1246
-trigger,きっかけになる1247
-commute,通勤する、通学する1248
-induce,誘う1249
-utilize,利用する1250
-snap,ポキンと折れる、ポキンと折る1251
-donate,提供する1252
-hatch,（卵?ヒナ）かえす、かえる1253
-enclose,囲む1254
-prevail,普及している、広まる1255
-sigh,ため息をつく1256
-leak,漏れる、漏らす1257
-compel,強制する1258
-crush,押しつぶす1259
-comprehend,理解する1260
-negotiate,交渉する1261
-persist,持続する、残る1262
-multiply,増やす、増える、掛ける1263
-conceive,想像する1264
-compensate,埋め合わせる1265
-suspend,中止する、つるす1266
-stir,かきたてる1267
-soak,浸す、びしょぬれにする、吸収する1268
-refine,洗練する、磨きをかける1269
-arouse,刺激する、かき立てる1270
-precede,先行する1271
-render,OをCにする、変える1272
-mount,すえつける、乗る1273
-retreat,退く1274
-startle,驚かせる1275
-dare,する勇気がある1276
-sphere,領域、範囲1277
-sequence,連続、順番、順序1278
-deposit,預金、頭金、堆積物1279
-poll,世論調査、投票1280
-caution,用心1281
-rage,激怒、怒り1282
-formula,式、公式、方法、秘訣、解決策1283
-plot,筋、たくらみ、陰謀1284
-scope,範囲1285
-norm,規範1286
-disgust,嫌悪1287
-compromise,妥協1288
-supervisor,監督者1289
-paradox,逆説1290
-tissue,（生物の）組織；ティッシュペーパー1291
-breakdown,崩壊1292
-initiative,構想、主導権、1293
-fabric,織物、布1294
-publicity,宣伝、広告1295
-summit,頂上、頂点、首脳会議1296
-flock,群れ1297
-plague,疫病1298
-haste,急ぐこと1299
-nap,うたた寝1300
-ally,同盟国1301
-draft,下書き、草稿1302
-spectacle,光景1303
-premise,前提1304
-asset,財産1305
-lag,遅れ1306
-therapy,療法、治療法1307
-reception,もてなし1308
-compound,化合物1309
-blessing,ありがたいもの、恵み1310
-sensation,感覚、感じ1311
-recession,不景気、不況1312
-pole,棒、極1313
-outlook,態度、考え方、見通し、見込み1314
-endeavor,活動1315
-mercy,慈悲、情け1316
-counterpart,相当するもの1317
-session,期間、討論1318
-spectrum,変動範囲、領域1319
-junk,くず、がらくた1320
-worship,崇拝1321
-apt,しがちである、する傾向がある1322
-humble,謙虚な、粗末な1323
-entitled,得る権利がある、題された1324
-valid,妥当な、正当な1325
-faint,かすかな1326
-stiff,堅い1327
-obscure,わかりにくい1328
-fierce,激しい1329
-acute,（問題が）深刻な、（感覚・痛みが）鋭い1330
-idle,（仕事がなくて）何もしていない1331
-crude,粗末な、粗野な1332
-jealous,嫉妬深い、羨ましい1333
-pregnant,妊娠している1334
-liable,しがちである、可能性が高い1335
-stubborn,頑固な1336
-decent,まともな1337
-marvelous,驚くべき1338
-misleading,誤解を招く1339
-synthetic,合成の1340
-classical,クラシックの1341
-Muslim,イスラム教の1342
-anticipate,予想する1343
-rub,こする1344
-dispose,処理する1345
-refrain,控える1346
-accumulate,蓄積する1347
-boost,活気づける1348
-drag,引きずる1349
-revise,修正する1350
-scratch,かく1351
-roar,ほえる1352
-quote,引用する1353
-bloom,咲く1354
-insert,差し込む1355
-awaiting,待つ1356
-dread,恐れる1357
-conceal,隠す1358
-enrich,豊かにする1359
-cling,固執する1360
-surpass,まさる1361
-suppress,抑える1362
-portray,描く1363
-soaring,急上昇する1364
-drain,排出する1365
-glow,ボーッと光る1366
-migrate,移住する1367
-exclaim,叫ぶ1368
-exert,及ぼす1369
-disguise,隠す1370
-accelerate,加速する1371
-dwell,住む1372
-integrate,融けこませる1373
-weep,泣く1374
-reassure,安心させる1375
-crawl,はって進む1376
-restrain,抑制する1377
-resent,腹を立てる1378
-yell,大声で叫ぶ1379
-assess,評価する1380
-carve,彫る1381
-halt,止める1382
-inspect,検査する1383
-tackle,取り組む1384
-omit,省く1385
-chew,かむ1386
-resume,再開する1387
-mold,作る1388
-accommodate,収容できる1389
-erase,消す1390
-inferred,推量する1391
-revive,生き返らせる1392
-contemplate,考える1393
-rotate,回転する1394
-disrupt,かき乱す1395
-navigate,進進路を決める1396
-ache,痛む1397
-discard,捨てる1398
-incorporate,取り入れる1399
-overtake,追い越す1400
-supplement,補う1401
-manipulate,操作する1402
-nourish,養う1403
-squeeze,しぼる1404
-depict,描く1405
-distract,そらす1406
-disclose,暴露する1407
-enroll,入学する1408
-nurture,育てる1409
-speculate,推測する1410
-prolong,延ばす1411
-execute,処刑する1412
-uncover,明らかにする1413
-tremble,震える1414
-seize,つかむ1415
-abolish,廃止する1416
-scold,しかる1417
-attain,達成する1418
-utter,発する1419
-flee,逃げる1420
-offending,怒らせる1421
-confess,告白する1422
-postpone,延期する1423
-drift,漂う1424
-weave,織る1425
-install,備えつける1426
-twist,ねじ曲げる1427
-extract,取り出す1428
-bump,ぶつかる1429
-despise,軽蔑する1430
-tolerate,我慢する1431
-boast,自慢する1432
-flourishing,栄えている1433
-disregard,無視する1434
-tease,からかう1435
-reinforce,強める1436
-strive,努力する1437
-coordinate,合わせる1438
-yawn,あくびをする1439
-hug,抱きしめる1440
-combat,戦う1441
-knit,編む1442
-fatigue,疲労1443
-fame,名声1444
-mess,めちゃくちゃ1445
-dignity,尊厳1446
-canal,運河1447
-drought,干ばつ1448
-despair,絶望1449
-interval,間隔1450
-luggage,荷物1451
-behalf,代表して1452
-impulse,衝動1453
-debris,破片1454
-beast,野獣1455
-superstition,迷信1456
-illusion,幻想、錯覚1457
-thread,糸1458
-intake,摂取量1459
-feast,宴会1460
-transition,移り変わり1461
-misery,悲惨さ1462
-radiation,放射線1463
-log,丸太1464
-consensus,合意1465
-deed,行い1466
-proverb,ことわざ1467
-compliment,ほめ言葉1468
-flame,炎1469
-anniversary,記念日1470
-conscience,良心1471
-expedition,探検1472
-offspring,子孫1473
-allowance,こづかい1474
-headline,大見出し1475
-treaty,条約1476
-monument,記念碑1477
-worm,虫1478
-remedy,治療法1479
-encyclopedia,百科事典1480
-glimpse,ちらり1481
-personnel,職員1482
-triumph,勝利1483
-arithmetic,算数1484
-self-esteem,自尊心1485
-microbe,微生物1486
-odds,可能性1487
-chaos,混沌1488
-destiny,運命1489
-diameter,直径1490
-lottery,宝くじ1491
-souvenir,みやげ物1492
-trail,小道1493
-ratio,比率1494
-sword,剣1495
-whistle,笛1496
-sentiment,感情1497
-chore,雑用1498
-courtesy,礼儀1499
-mayor,市長1500
-surveillance,監視、見張り1501
-trash,ごみ1502
-prestige,名声1503
-headquarters,本部、本社1504
-wilderness,荒野1505
-orbit,軌道1506
-bias,偏見1507
-republic,共和国1508
-bargain,掘り出し物1509
-domain,領域1510
-fragment,破片1511
-galaxy,星雲1512
-lap,ひざ1513
-deadline,締め切り1514
-bullet,弾丸1515
-pedestrian,歩行者1516
-wit,機知1517
-nuisance,迷惑1518
-criteria,基準1519
-hardship,苦難1520
-glory,栄光1521
-pavement,歩道1522
-navy,海軍1523
-script,台本1524
-pension,年金1525
-province,州1526
-surplus,余剰1527
-moisture,水分1528
-patch,あて布1529
-altitude,高度、標高1530
-thermometer,温度計1531
-tuition,授業料1532
-troop,軍隊1533
-primate,霊長類1534
-flaw,欠陥1535
-nephew,甥1536
-garment,衣服、衣類1537
-diagnosis,診断1538
-commerce,商業1539
-antiquity,古代、古物1540
-fraction,ほんの一部1541
-irony,皮肉1542
-nightmare,悪夢1543
-defect,欠陥1544
-certificate,証明書1545
-decay,腐敗1546
-erosion,浸食1547
-recipe,秘けつ1548
-skeleton,骨格1549
-grace,優雅さ1550
-landmark,名所1551
-dementia,認知症1552
-flesh,肉1553
-collision,衝突、対立1554
-hazard,危険なもの1555
-tomb,墓1556
-injection,注射1557
-breakthrough,飛躍的進歩1558
-leather,革1559
-jewelry,宝石1560
-cue,合図1561
-ambulance,救急車1562
-estate,不動産1563
-commodity,商品1564
-departure,出発1565
-phase,段階1566
-thief,泥棒1567
-saint,聖1568
-sculpture,彫刻1569
-grief,悲しみ1570
-lane,車線1571
-predator,捕食動物1572
-fluid,流体1573
-incentive,はげみ1574
-bride,花嫁1575
-intervention,介入1576
-margin,差1577
-biography,伝記1578
-consent,同意1579
-volcano,火山1580
-rebel,反逆者1581
-metaphor,比喩1582
-legislation,法律1583
-lightning,雷1584
-pesticide,殺虫剤1585
-column,コラム1586
-rumor,うわさ1587
-dust,ほほこり1588
-dialogue,対話1589
-kindergarten,幼稚園1590
-diabetes,糖尿病1591
-obesity,肥満1592
-patent,特許1593
-chapter,章1594
-palace,宮殿1595
-laundry,洗濯1596
-ward,病棟1597
-outbreak,ぼっ発1598
-equation,方程式1599
-archaeologist,考古学者1600
-corruption,腐敗1601
-germ,細菌1602
-revenue,収入1603
-spouse,配偶者1604
-epidemic,流行1605
-mortality,死亡1606
-syndrome,症候群1607
-retail,小売り1608
-dose,量1609
-beverage,飲み物1610
-metabolism,新陳代謝1611
-hybrid,交配種1612
-scent,香り1613
-inflammation,炎症1614
-pill,薬1615
-grave,重大な1616
-fertile,肥えた1617
-hostile,反感を持つ1618
-indispensable,不可欠な1619
-oriented,志向の1620
-splendid,すばらしい1621
-competent,有能な1622
-supreme,最高の1623
-straightforward,わかりやすい1624
-sacred,聖1625
-bold,大胆な1626
-uneasy,不安な1627
-neat,きちんとした1628
-shallow,浅い1629
-fake,偽物の1630
-superficial,表面的な1631
-absurd,ばかげた1632
-fragile,壊れやすい1633
-respectable,ちゃんとした1634
-magnificent,すばらしい1635
-infinite,無限の1636
-comprehensive,包括的な1637
-steep,険しい1638
-gross,総1639
-subsequent,次に起こる1640
-sincere,心からの1641
-toxic,有毒な1642
-neutral,中立の1643
-diligent,勤勉な1644
-sore,痛い1645
-contaminated,汚染された1646
-ambiguous,あいまいな1647
-oral,口述の1648
-restless,落ち着かない1649
-rotten,腐った1650
-vigorous,精力的な1651
-immense,莫大な1652
-metropolitan,大都市の1653
-punctual,時間をきっちり守る1654
-solitary,孤独な1655
-collective,集団1656
-diplomatic,外交の1657
-nasty,不快な1658
-helpless,無力な1659
-explicit,明確な、はっきりした1660
-bankrupt,破産した1661
-eternal,永遠の1662
-sole,唯一の1663
-sour,すっぱい1664
-notable,注目すべき1665
-affluent,裕福な1666
-naked,裸の1667
-vocal,発声1668
-feminine,女性の1669
-vacant,空いている1670
-exotic,外来の1671
-rigid,厳格な1672
-humid,蒸し暑い1673
-outstanding,傑出した1674
-addicted,中毒である1675
-vulnerable,受けやすい1676
-spontaneous,自然に起こる1677
-greedy,貪欲な1678
-trivial,ささいな1679
-per capita,一人当たりの1680
-inherent,元から伴う1681
-promising,前途有望な1682
-physiological,生理的な1683
-clinical,臨床1684
-chronic,慢性の1685
-geological,地質学的な1686
-countless,無数の1687
-innate,先天的な1688
-alert,用心する1689
-autonomous,自動運転1690
-simultaneously,同時に1691
-utterly,まったく1692
-drastically,劇的に1693
-necessarily,必ずしも1694
-thereby,そうすることで1695
-frankly,率直に1696
-namely,すなわち1697
-hence,だから1698
-via,経由で1699
-owing,のために1700
-clarify,明らかにする1701
-smash,粉々に砕く1702
-mourn,悲しむ1703
-summon,呼ぶ1704
-shatter,粉々にする1705
-linger,残る1706
-lament,嘆く1707
-endowed,恵まれる1708
-rejoice,喜ぶ1709
-allocate,配分する1710
-slap,ピシャリと打つ1711
-contend,主張する1712
-swear,誓う1713
-discern,識別する1714
-degrade,悪化させる1715
-erect,築く1716
-testify,証言する1717
-spur,駆りたてる1718
-roam,歩き回る1719
-frown,まゆをひそめる1720
-lure,呼び込む1721
-defy,逆らう1722
-stroll,ぶらつく1723
-rattle,がたがた鳴らす1724
-reconcile,調和させる1725
-blur,ぼやかす1726
-soothe,ななめる1727
-impair,低下させる1728
-comply,従う1729
-pierce,穴をあける1730
-stumble,つまずく1731
-hinder,さまたげる1732
-mock,あざける1733
-embody,具現する1734
-stalk,忍び寄る1735
-proclaim,宣言する1736
-applaud,拍手する1737
-inflict,与える1738
-merge,合併する1739
-evacuations,避難した1740
-undone,元に戻る1741
-poke,突く1742
-haunted,つきまとわれる1743
-adhere,固く守る1744
-compile,まとめる1745
-wither,しぼむ1746
-stun,びっくりさせる1747
-choke,のどがつまる1748
-deteriorate,悪化する1749
-dump,捨てる1750
-murmur,つぶやく1751
-delete,削除する1752
-inhibit,阻害する1753
-divert,そらす1754
-tame,飼いならす1755
-reap,手に入れる1756
-affirm,断言する1757
-immersed,浸る1758
-expire,期限が切れる1759
-embark,乗り出す1760
-vow,誓う1761
-foresee,予知する1762
-adore,崇拝する1763
-yearn,切望する1764
-undermine,弱める1765
-suck,吸う1766
-pledge,誓う1767
-intrude,立ち入る1768
-sue,訴える1769
-distort,歪曲する1770
-extinguish,消す1771
-preach,説教する1772
-curb,抑制する1773
-withstand,耐える1774
-dip,浸す1775
-recite,暗唱する1776
-thrust,押し込む1777
-plead,嘆願する1778
-humiliate,恥をかかせる1779
-discharge,放出する1780
-condemn,非難する1781
-retrieve,検索する1782
-shrug,肩をすくめる1783
-evoke,呼び起こす1784
-fetch,取ってくる1785
-flatter,お世辞を言う1786
-prose,散文1787
-textile,織物1788
-timber,材木1789
-masterpiece,傑作1790
-riot,暴動1791
-carriage,車両1792
-apparatus,装置1793
-fuss,大騒ぎ1794
-deficiency,欠乏1795
-heir,相続人1796
-equator,赤道1797
-petroleum,石油1798
-witch,魔女1799
-vapor,蒸気1800
-probe,探査機1801
-expertise,専門知識1802
-scorn,軽蔑1803
-prophet,預言者1804
-breeze,そよ風1805
-sin,罪1806
-surge,急増1807
-complement,補うもの1808
-queue,列1809
-stake,賭け金1810
-ambassador,大使1811
-jury,陪審員1812
-cluster,集団1813
-lump,こぶ1814
-meadow,牧草地1815
-feat,偉業1816
-temperament,気質1817
-chill,寒気1818
-appliance,器具1819
-predecessor,前任者1820
-entity,存在1821
-hospitality,もてなし1822
-narrative,話1823
-segment,部分、区分1824
-catastrophe,大災害1825
-monarch,君主、皇帝1826
-constraint,制約1827
-amendment,改正、修正1828
-cosmos,宇宙1829
-aisle,通路1830
-hierarchy,階級制度1831
-toll,通行料1832
-transaction,取引1833
-burglar,強盗1834
-tyranny,圧政1835
-parasite,寄生生物1836
-intuition,直感1837
-communist,共産主義の1838
-legacy,遺産1839
-vein,静脈1840
-discourse,論説1841
-dairy,乳製品、酪農1842
-artifact,工芸品1843
-outlet,はけ口1844
-apprehension,不安1845
-melancholy,憂うつ1846
-novelty,目新しさ1847
-specimen,標本1848
-hygiene,衛生1849
-tactics,戦術1850
-monopoly,独占1851
-token,印1852
-aristocracy,貴族階級1853
-revenge,復讐1854
-activist,活動家1855
-rhetoric,美辞麗句1856
-entrepreneur,起業家1857
-census,国勢調査1858
-verge,瀬戸際1859
-advent,出現、到来1860
-analogy,類似点1861
-irrigation,灌漑1862
-coverage,報道1863
-cuisine,料理1864
-menace,脅威1865
-peril,危険1866
-limb,手足1867
-assault,攻撃1868
-hatred,憎しみ1869
-autonomy,自主性1870
-cram,塾1871
-subsidy,補助金1872
-empathy,共感1873
-slang,俗語1874
-posture,姿勢1875
-ideology,イデオロギー1876
-curse,災いのもと1877
-tumor,腫瘍1878
-intersection,交差点1879
-duration,期間1880
-deforestation,森林破壊1881
-precaution,用心1882
-bunch,ひとたばの1883
-shortcoming,欠点1884
-aspiration,熱望1885
-psychiatrist,精神科医1886
-shipping,発送1887
-senator,上院議員1888
-statesman,政治家1889
-subordinate,部下1890
-vacuum,空白1891
-quest,探究1892
-meditation,瞑想1893
-subscriber,加入者1894
-riddle,謎1895
-rag,ぼろ1896
-rust,さび1897
-sanitation,衛生1898
-midst,まっただ中1899
-mischief,いたずら1900
-proficiency,検定1901
-recollection,記憶1902
-latitude,緯1903
-friction,摩擦1904
-botanist,植物学者1905
-heredity,遺伝1906
-contempt,軽蔑1907
-anatomy,構造1908
-integrity,誠実1909
-cargo,貨物1910
-bribe,わいろ1911
-eruption,噴火1912
-funeral,葬式1913
-deficit,赤字1914
-bulk,大部分1915
-millionaire,百万長者1916
-ash,灰1917
-realm,領域1918
-plantation,農園1919
-plow,すき1920
-vending,販売1921
-orphan,孤児1922
-neuron,神経細胞1923
-vegetation,植生1924
-warrior,戦士1925
-mutation,突然変異1926
-sewage,下水1927
-paradigm,理論的枠組1928
-protocol,議定書1929
-skyscraper,高層ビル1930
-accord,一致1931
-bureaucrat,官僚1932
-array,多彩1933
-clash,衝突1934
-torture,拷問1935
-reign,統治1936
-thesis,論文1937
-digit,桁1938
-agenda,課題1939
-onset,発症1940
-peasant,小作農1941
-ultraviolet,紫外1942
-renowned,有名な1943
-transparent,透き通った1944
-dim,薄暗い1945
-legitimate,正当な1946
-adverse,悪1947
-swift,すばやい1948
-naive,世間知らずの1949
-dumb,ばか1950
-gloomy,暗い1951
-furious,激怒した1952
-earnest,まじめな1953
-terrific,すばらしい1954
-vertical,垂直な1955
-wicked,邪悪な1956
-subjective,主観的な1957
-enlightened,進んだ考えの1958
-authentic,本物の1959
-brutal,残忍な1960
-dizzy,めまい1961
-sheer,まったくの1962
-naughty,いたずらな1963
-damp,湿った1964
-static,静的な1965
-doomed,運命にある1966
-respiratory,呼吸器に関する、呼吸の1967
-innumerable,無数の1968
-clumsy,不器用な1969
-aesthetic,美的1970
-obsessed,とりつかれている1971
-detached,切り離された1972
-wrecked,難破した1973
-reckless,無謀な1974
-arrogant,傲慢な1975
-preoccupied,頭がいっぱいだ1976
-gigantic,巨大な1977
-conspicuous,顕著な1978
-slender,すらりとした1979
-manifest,明らかな1980
-tidy,きちんと1981
-skeptical,懐疑的な1982
-notorious,悪名高い1983
-anonymous,匿名の1984
-monotonous,単調な1985
-ample,豊富に1986
-trim,こぎれいな1987
-savage,野蛮な1988
-coherent,一貫した1989
-eloquent,雄弁な1990
-foul,不快な1991
-juvenile,青少年の1992
-compulsory,義務的な1993
-prone,やすい1994
-arbitrary,勝手な1995
-ingenious,独創的な1996
-divine,神聖なる1997
-tender,やさしい1998
-outraged,憤慨している1999
-intrinsic,本来の2000
-paralyzed,麻痺している2001
-compatible,適合する2002
-patriotic,愛国的な2003
-eminent,名高い2004
-potent,強力な2005
-insane,正気を失っている2006
-staple,主要な2007
-secondhand,間接2008
-indigenous,先住2009
-utmost,最も2010
-integral,不可欠な2011
-intricate,複雑な2012
-demographic,人口統計の2013
-mighty,強力な2014
-intact,無傷の2015
-intent,決意をしている2016
-intriguing,興味深い2017
-merry,陽気な2018
-perpetual,永続する2019
-spinal,脊椎の2020
-susceptible,かかりやすい2021
-mandatory,義務的な2022
-upright,まっすぐに2023
-abruptly,不意に2024
-conversely,逆に2025
-predominantly,主に2026
-lest,～しないように2027
+exaggerate,～を誇張する 899
+conquer,～を征服する 900
+melt,溶ける 901
+invade,～に侵入する 902
+modify,～を修正する 903
+scatter,～をばらまく 904
+undergo,～を経験する 905
+evaluate,～を評価する 906
+bend,身をかがめる 907
+derive,由来する 908
+screaming,悲鳴をあげる 909
+gaze,見つめる 910
+pray,祈る 911
+polish,～を磨く 912
+classify,分類する 913
+assert,～と主張する 914
+grab,～をつかむ 915
+fold,～を折りたたむ 916
+sweep,～を掃く 917
+whisper,ささやく 918
+imitate,～をまねる 919
+stare,じっと見る 920
+emphasize,～を強調する 921
+rid,～を取り除く 922
+pour,～を注ぐ 923
+vanish,消える 924
+restore,～を修復する 925
+deserve,当然だ 926
+laboratory,研究所 927
+conference,会議 928
+continent,大陸 929
+insurance,保険 930
+crew,乗組員たち 931
+poverty,貧乏 932
+shortage,不足 933
+affair,情勢 934
+exception,例外 935
+wage,賃金 936
+wisdom,知恵 937
+tax,税金 938
+evolution,進化 939
+barrier,壁 940
+category,範ちゅう 941
+unit,単位 942
+reputation,評判 943
+virtue,美徳 944
+courage,勇気 945
+sympathy,同情 946
+union,組合 947
+civilization,文明 948
+volume,冊 949
+blossom,花 950
+era,時代 951
+dispute,紛争 952
+tourism,観光 953
+mankind,人類 954
+murder,殺人 955
+landscape,風景 956
+destination,目的地 957
+tale,話 958
+reform,改革 959
+muscle,筋肉 960
+prospect,見通し 961
+corporation,企業 962
+colony,植民地 963
+quarrel,口論 964
+profession,職業 965
+aspect,側面 966
+pause,休止 967
+conflict,対立 968
+privilege,特権 969
+prosperity,繁栄 970
+genius,天才 971
+seed,種 972
+symptom,症状 973
+merit,長所 974
+layer,層 975
+clue,手がかり 976
+circumstances,状況 977
+district,地区 978
+prison,刑務所 979
+companion,仲間 980
+executive,重役 981
+justice,正義 982
+procedure,手続き 983
+ray,光線 984
+heaven,天国 985
+luxury,贅沢 986
+oxygen,酸素 987
+fund,資金 988
+theme,主題、テーマ 989
+boundary,境界 990
+ambition,熱望 991
+forecast,予報 992
+psychology,心理学 993
+labor,労働 994
+committee,委員会 995
+physician,医者 996
+philosophy,哲学 997
+affection,愛情 998
+candidate,候補 999
+bomb,爆弾 1000
+priority,優先 1001
+obstacle,障害 1002
+appetite,食欲 1003
+tension,緊張 1004
+tribe,部族 1005
+budget,予算 1006
+campaign,運動、キャンペーン 1007
+sorrow,悲しみ 1008
+satellite,衛星 1009
+insight,洞察 1010
+cough,せき 1011
+fate,運命 1012
+scheme,計画 1013
+insult,侮辱 1014
+inhabitant,住民 1015
+fossil,化石 1016
+motive,動機 1017
+instinct,本能 1018
+legend,伝説 1019
+empire,帝国 1020
+suburb,郊外 1021
+architecture,建築 1022
+passion,情熱 1023
+cancer,ガン 1024
+logic,論理 1025
+dozen,ダース 1026
+harvest,収穫 1027
+ingredient,材料 1028
+hypothesis,仮説 1029
+voyage,航海 1030
+editor,編集者 1031
+option,選択の自由 1032
+hemisphere,半球 1033
+mechanism,仕組み 1034
+anthropologist,人類学者 1035
+tragedy,悲劇 1036
+antibiotic,抗生物質 1037
+fare,運賃 1038
+debt,借金 1039
+curriculum,教育課程 1040
+component,構成要素 1041
+wheat,小麦 1042
+usage,語法 1043
+castle,城 1044
+famine,飢饉 1045
+extinction,絶滅 1046
+purse,財布 1047
+folk,民族 1048
+explosion,爆発 1049
+portion,部分 1050
+organism,生物 1051
+merchant,商人 1052
+myth,神話 1053
+incident,出来事 1054
+wildlife,野生生物 1055
+congress,議会 1056
+bay,湾 1057
+penalty,刑 1058
+heritage,遺産 1059
+diversity,多様性 1060
+thumb,親指 1061
+geography,地理 1062
+factor,要因 1063
+discrimination,差別 1064
+virus,ウイルス 1065
+statue,像 1066
+priest,神父 1067
+pioneer,先駆者 1068
+trait,特徴 1069
+bond,きずな 1070
+grocery,食料品 1071
+secretary,秘書 1072
+dialect,方言 1073
+astronomy,天文学 1074
+youngster,子供 1075
+substance,物質 1076
+finding,発見 1077
+strategy,戦略 1078
+lung,肺 1079
+opponent,敵 1080
+ritual,儀式 1081
+outcome,結果 1082
+conservation,環境保護 1083
+mammal,哺乳類 1084
+telescope,望遠鏡 1085
+refugee,難民 1086
+code,規則 1087
+flavor,風味 1088
+particle,粒子 1089
+nursing,看護 1090
+suicide,自殺 1091
+habitat,生息地 1092
+bullying,いじめ 1093
+dinosaur,恐竜 1094
+council,議会 1095
+gender,性別 1096
+surgery,手術 1097
+innovation,革新 1098
+protein,タンパク質 1099
+nutrition,栄養 1100
+disaster,災害 1101
+emission,排出 1102
+ape,類人猿 1103
+molecule,分子 1104
+sweat,汗 1105
+transplant,移植 1106
+species,種 1107
+tip,先 1108
+cattle,牛 1109
+density,密度 1110
+concept,概念 1111
+pale,青白い 1112
+precious,貴重な 1113
+loyal,忠実な 1114
+isolated,孤立している 1115
+generous,気前のよい 1116
+tropical,熱帯 1117
+reluctant,したがらない 1118
+vague,漠然とした 1119
+vast,広大な 1120
+numerous,たくさんの 1121
+rural,田舎の 1122
+widespread,広まっている 1123
+complicated,複雑な 1124
+visible,目に見える 1125
+raw,生の 1126
+remote,へんぴな 1127
+urgent,緊急の 1128
+silly,ばかな 1129
+striking,いちじるしい 1130
+adequate,十分な 1131
+extraordinary,並外れた 1132
+odd,おかしな 1133
+abstract,抽象的な 1134
+mutual,相互の 1135
+excessive,過度の 1136
+ashamed,恥ずかしい 1137
+tremendous,とてつもない 1138
+inevitable,避けられない 1139
+pure,純 1140
+stable,安定した 1141
+indifferent,無関心だ 1142
+aggressive,攻撃的な 1143
+ultimate,究極の 1144
+shy,内気な 1145
+solar,太陽 1146
+profound,深い 1147
+subtle,微妙な 1148
+conservative,保守 1149
+brave,勇敢な 1150
+intense,強烈な 1151
+alcoholic,アルコールの 1152
+manual,手を使う 1153
+cruel,残酷な 1154
+rational,理性的な 1155
+initial,最初の 1156
+immune,免疫 1157
+linguistic,言語の 1158
+crucial,重大な 1159
+verbal,言葉による 1160
+optimistic,楽観的な 1161
+flexible,柔軟な 1162
+grateful,感謝している 1163
+lively,生き生きとした 1164
+overwhelming,圧倒的な 1165
+abundant,豊富な 1166
+selfish,利己的な 1167
+ugly,みにくい 1168
+racial,人種の 1169
+prominent,有名な 1170
+controversial,物議を呼ぶ 1171
+federal,連邦の 1172
+ridiculous,ばかげた 1173
+imaginary,架空の 1174
+harsh,厳しい 1175
+random,無作為な 1176
+adolescent,思春期の 1177
+up-to-date,最新の 1178
+liberal,自由主義の 1179
+prior,前の 1180
+moderate,適度な 1181
+fluent,流ちょうな 1182
+elaborate,手の込んだ 1183
+incredible,信じられない 1184
+radical,根本的な 1185
+acid,酸性の 1186
+deaf,耳が不自由な 1187
+medieval,中世の 1188
+ecological,生態 1189
+slight,少しの 1190
+ignorant,無知な 1191
+cognitive,認知 1192
+absolutely,絶対に 1193
+virtually,ほとんど 1194
+somewhat,多少 1195
+merely,単に 1196
+literally,文字通り 1197
+seemingly,一見 1198
+regardless,関係なく 1199
+thoroughly,徹底的に 1200
+submit,Aに服従する、提出する 1201
+tempt,誘惑する、する気にさせる 1202
+resign,辞職する 1203
+conform,従う 1204
+confine,限定する 1205
+assemble,組み立てる 1206
+dedicate,ささげる 1207
+advocate,主張する 1208
+thrive,繁栄する 1209
+provoke,引き起こす 1210
+dictate,命じる、要求する、決定する 1211
+exploit,利用する、開発する 1212
+surrender,降伏する 1213
+reproduce,再生する、複製する、繁殖する[させる] 1214
+acknowledge,認める 1215
+swell,ふくらむ 1216
+shed,落とす 1217
+wind,曲がる 1218
+cite,引き合いに出す 1219
+digest,消化する 1220
+skip,とばす、抜かす 1221
+bind,縛る、束縛する 1222
+dissolve,溶解する 1223
+implement,実行する 1224
+steer,操縦する 1225
+congratulate,祝福する 1226
+designate,指定する 1227
+violate,破る、違反する 1228
+presume,推定する、思う 1229
+recruit,（新人を）入れる 1230
+coincide,同時に起きる、重なる 1231
+enforce,施行する 1232
+displace,とってかわる、故郷から追い出す 1233
+shrink,縮む、縮ませる、減る 1234
+betray,裏切る、もらす 1235
+comprise,構成される、構成する、占める 1236
+indulge,ふける 1237
+penetrate,入り込む 1238
+devastate,壊滅させる 1239
+plunge,突っ込む 1240
+bounce,はね返る 1241
+contradict,矛盾する 1242
+prescribe,処方する 指示する 1243
+oppress,しいたげる 1244
+cherish,胸に抱く 1245
+illuminate,照らす、解明する 1246
+trigger,きっかけになる 1247
+commute,通勤する、通学する 1248
+induce,誘う 1249
+utilize,利用する 1250
+snap,ポキンと折れる、ポキンと折る 1251
+donate,提供する 1252
+hatch,（卵?ヒナ）かえす、かえる 1253
+enclose,囲む 1254
+prevail,普及している、広まる 1255
+sigh,ため息をつく 1256
+leak,漏れる、漏らす 1257
+compel,強制する 1258
+crush,押しつぶす 1259
+comprehend,理解する 1260
+negotiate,交渉する 1261
+persist,持続する、残る 1262
+multiply,増やす、増える、掛ける 1263
+conceive,想像する 1264
+compensate,埋め合わせる 1265
+suspend,中止する、つるす 1266
+stir,かきたてる 1267
+soak,浸す、びしょぬれにする、吸収する 1268
+refine,洗練する、磨きをかける 1269
+arouse,刺激する、かき立てる 1270
+precede,先行する 1271
+render,OをCにする、変える 1272
+mount,すえつける、乗る 1273
+retreat,退く 1274
+startle,驚かせる 1275
+dare,する勇気がある 1276
+sphere,領域、範囲 1277
+sequence,連続、順番、順序 1278
+deposit,預金、頭金、堆積物 1279
+poll,世論調査、投票 1280
+caution,用心 1281
+rage,激怒、怒り 1282
+formula,式、公式、方法、秘訣、解決策 1283
+plot,筋、たくらみ、陰謀 1284
+scope,範囲 1285
+norm,規範 1286
+disgust,嫌悪 1287
+compromise,妥協 1288
+supervisor,監督者 1289
+paradox,逆説 1290
+tissue,（生物の）組織 ； ティッシュペーパー 1291
+breakdown,崩壊 1292
+initiative,構想、主導権、 1293
+fabric,織物、布 1294
+publicity,宣伝、広告 1295
+summit,頂上、頂点、首脳会議 1296
+flock,群れ 1297
+plague,疫病 1298
+haste,急ぐこと 1299
+nap,うたた寝 1300
+ally,同盟国 1301
+draft,下書き、草稿 1302
+spectacle,光景 1303
+premise,前提 1304
+asset,財産 1305
+lag,遅れ 1306
+therapy,療法、治療法 1307
+reception,もてなし 1308
+compound,化合物 1309
+blessing,ありがたいもの、恵み 1310
+sensation,感覚、感じ 1311
+recession,不景気、不況 1312
+pole,棒、極 1313
+outlook,態度、考え方、見通し、見込み 1314
+endeavor,活動 1315
+mercy,慈悲、情け 1316
+counterpart,相当するもの 1317
+session,期間、討論 1318
+spectrum,変動範囲、領域 1319
+junk,くず、がらくた 1320
+worship,崇拝 1321
+apt,しがちである、する傾向がある 1322
+humble,謙虚な、粗末な 1323
+entitled,得る権利がある、題された 1324
+valid,妥当な、正当な 1325
+faint,かすかな 1326
+stiff,堅い 1327
+obscure,わかりにくい 1328
+fierce,激しい 1329
+acute,（問題が）深刻な、（感覚・痛みが）鋭い 1330
+idle,（仕事がなくて）何もしていない 1331
+crude,粗末な、粗野な 1332
+jealous,嫉妬深い、羨ましい 1333
+pregnant,妊娠している 1334
+liable,しがちである、可能性が高い 1335
+stubborn,頑固な 1336
+decent,まともな 1337
+marvelous,驚くべき 1338
+misleading,誤解を招く 1339
+synthetic,合成の 1340
+classical,クラシックの 1341
+Muslim,イスラム教の 1342
+anticipate,予想する 1343
+rub,こする 1344
+dispose,処理する 1345
+refrain,控える 1346
+accumulate,蓄積する 1347
+boost,活気づける 1348
+drag,引きずる 1349
+revise,修正する 1350
+scratch,かく 1351
+roar,ほえる 1352
+quote,引用する 1353
+bloom,咲く 1354
+insert,差し込む 1355
+awaiting,待つ 1356
+dread,恐れる 1357
+conceal,隠す 1358
+enrich,豊かにする 1359
+cling,固執する 1360
+surpass,まさる 1361
+suppress,抑える 1362
+portray,描く 1363
+soaring,急上昇する 1364
+drain,排出する 1365
+glow,ボーッと光る 1366
+migrate,移住する 1367
+exclaim,叫ぶ 1368
+exert,及ぼす 1369
+disguise,隠す 1370
+accelerate,加速する 1371
+dwell,住む 1372
+integrate,融けこませる 1373
+weep,泣く 1374
+reassure,安心させる 1375
+crawl,はって進む 1376
+restrain,抑制する 1377
+resent,腹を立てる 1378
+yell,大声で叫ぶ 1379
+assess,評価する 1380
+carve,彫る 1381
+halt,止める 1382
+inspect,検査する 1383
+tackle,取り組む 1384
+omit,省く 1385
+chew,かむ 1386
+resume,再開する 1387
+mold,作る 1388
+accommodate,収容できる 1389
+erase,消す 1390
+inferred,推量する 1391
+revive,生き返らせる 1392
+contemplate,考える 1393
+rotate,回転する 1394
+disrupt,かき乱す 1395
+navigate,進進路を決める 1396
+ache,痛む 1397
+discard,捨てる 1398
+incorporate,取り入れる 1399
+overtake,追い越す 1400
+supplement,補う 1401
+manipulate,操作する 1402
+nourish,養う 1403
+squeeze,しぼる 1404
+depict,描く 1405
+distract,そらす 1406
+disclose,暴露する 1407
+enroll,入学する 1408
+nurture,育てる 1409
+speculate,推測する 1410
+prolong,延ばす 1411
+execute,処刑する 1412
+uncover,明らかにする 1413
+tremble,震える 1414
+seize,つかむ 1415
+abolish,廃止する 1416
+scold,しかる 1417
+attain,達成する 1418
+utter,発する 1419
+flee,逃げる 1420
+offending,怒らせる 1421
+confess,告白する 1422
+postpone,延期する 1423
+drift,漂う 1424
+weave,織る 1425
+install,備えつける 1426
+twist,ねじ曲げる 1427
+extract,取り出す 1428
+bump,ぶつかる 1429
+despise,軽蔑する 1430
+tolerate,我慢する 1431
+boast,自慢する 1432
+flourishing,栄えている 1433
+disregard,無視する 1434
+tease,からかう 1435
+reinforce,強める 1436
+strive,努力する 1437
+coordinate,合わせる 1438
+yawn,あくびをする 1439
+hug,抱きしめる 1440
+combat,戦う 1441
+knit,編む 1442
+fatigue,疲労 1443
+fame,名声 1444
+mess,めちゃくちゃ 1445
+dignity,尊厳 1446
+canal,運河 1447
+drought,干ばつ 1448
+despair,絶望 1449
+interval,間隔 1450
+luggage,荷物 1451
+behalf,代表して 1452
+impulse,衝動 1453
+debris,破片 1454
+beast,野獣 1455
+superstition,迷信 1456
+illusion,幻想、錯覚 1457
+thread,糸 1458
+intake,摂取量 1459
+feast,宴会 1460
+transition,移り変わり 1461
+misery,悲惨さ 1462
+radiation,放射線 1463
+log,丸太 1464
+consensus,合意 1465
+deed,行い 1466
+proverb,ことわざ 1467
+compliment,ほめ言葉 1468
+flame,炎 1469
+anniversary,記念日 1470
+conscience,良心 1471
+expedition,探検 1472
+offspring,子孫 1473
+allowance,こづかい 1474
+headline,大見出し 1475
+treaty,条約 1476
+monument,記念碑 1477
+worm,虫 1478
+remedy,治療法 1479
+encyclopedia,百科事典 1480
+glimpse,ちらり 1481
+personnel,職員 1482
+triumph,勝利 1483
+arithmetic,算数 1484
+self-esteem,自尊心 1485
+microbe,微生物 1486
+odds,可能性 1487
+chaos,混沌 1488
+destiny,運命 1489
+diameter,直径 1490
+lottery,宝くじ 1491
+souvenir,みやげ物 1492
+trail,小道 1493
+ratio,比率 1494
+sword,剣 1495
+whistle,笛 1496
+sentiment,感情 1497
+chore,雑用 1498
+courtesy,礼儀 1499
+mayor,市長 1500
+surveillance,監視、見張り 1501
+trash,ごみ 1502
+prestige,名声 1503
+headquarters,本部、本社 1504
+wilderness,荒野 1505
+orbit,軌道 1506
+bias,偏見 1507
+republic,共和国 1508
+bargain,掘り出し物 1509
+domain,領域 1510
+fragment,破片 1511
+galaxy,星雲 1512
+lap,ひざ 1513
+deadline,締め切り 1514
+bullet,弾丸 1515
+pedestrian,歩行者 1516
+wit,機知 1517
+nuisance,迷惑 1518
+criteria,基準 1519
+hardship,苦難 1520
+glory,栄光 1521
+pavement,歩道 1522
+navy,海軍 1523
+script,台本 1524
+pension,年金 1525
+province,州 1526
+surplus,余剰 1527
+moisture,水分 1528
+patch,あて布 1529
+altitude,高度、標高 1530
+thermometer,温度計 1531
+tuition,授業料 1532
+troop,軍隊 1533
+primate,霊長類 1534
+flaw,欠陥 1535
+nephew,甥 1536
+garment,衣服、衣類 1537
+diagnosis,診断 1538
+commerce,商業 1539
+antiquity,古代、古物 1540
+fraction,ほんの一部 1541
+irony,皮肉 1542
+nightmare,悪夢 1543
+defect,欠陥 1544
+certificate,証明書 1545
+decay,腐敗 1546
+erosion,浸食 1547
+recipe,秘けつ 1548
+skeleton,骨格 1549
+grace,優雅さ 1550
+landmark,名所 1551
+dementia,認知症 1552
+flesh,肉 1553
+collision,衝突、対立 1554
+hazard,危険なもの 1555
+tomb,墓 1556
+injection,注射 1557
+breakthrough,飛躍的進歩 1558
+leather,革 1559
+jewelry,宝石 1560
+cue,合図 1561
+ambulance,救急車 1562
+estate,不動産 1563
+commodity,商品 1564
+departure,出発 1565
+phase,段階 1566
+thief,泥棒 1567
+saint,聖 1568
+sculpture,彫刻 1569
+grief,悲しみ 1570
+lane,車線 1571
+predator,捕食動物 1572
+fluid,流体 1573
+incentive,はげみ 1574
+bride,花嫁 1575
+intervention,介入 1576
+margin,差 1577
+biography,伝記 1578
+consent,同意 1579
+volcano,火山 1580
+rebel,反逆者 1581
+metaphor,比喩 1582
+legislation,法律 1583
+lightning,雷 1584
+pesticide,殺虫剤 1585
+column,コラム 1586
+rumor,うわさ 1587
+dust,ほほこり 1588
+dialogue,対話 1589
+kindergarten,幼稚園 1590
+diabetes,糖尿病 1591
+obesity,肥満 1592
+patent,特許 1593
+chapter,章 1594
+palace,宮殿 1595
+laundry,洗濯 1596
+ward,病棟 1597
+outbreak,ぼっ発 1598
+equation,方程式 1599
+archaeologist,考古学者 1600
+corruption,腐敗 1601
+germ,細菌 1602
+revenue,収入 1603
+spouse,配偶者 1604
+epidemic,流行 1605
+mortality,死亡 1606
+syndrome,症候群 1607
+retail,小売り 1608
+dose,量 1609
+beverage,飲み物 1610
+metabolism,新陳代謝 1611
+hybrid,交配種 1612
+scent,香り 1613
+inflammation,炎症 1614
+pill,薬 1615
+grave,重大な 1616
+fertile,肥えた 1617
+hostile,反感を持つ 1618
+indispensable,不可欠な 1619
+oriented,志向の 1620
+splendid,すばらしい 1621
+competent,有能な 1622
+supreme,最高の 1623
+straightforward,わかりやすい 1624
+sacred,聖 1625
+bold,大胆な 1626
+uneasy,不安な 1627
+neat,きちんとした 1628
+shallow,浅い 1629
+fake,偽物の 1630
+superficial,表面的な 1631
+absurd,ばかげた 1632
+fragile,壊れやすい 1633
+respectable,ちゃんとした 1634
+magnificent,すばらしい 1635
+infinite,無限の 1636
+comprehensive,包括的な 1637
+steep,険しい 1638
+gross,総 1639
+subsequent,次に起こる 1640
+sincere,心からの 1641
+toxic,有毒な 1642
+neutral,中立の 1643
+diligent,勤勉な 1644
+sore,痛い 1645
+contaminated,汚染された 1646
+ambiguous,あいまいな 1647
+oral,口述の 1648
+restless,落ち着かない 1649
+rotten,腐った 1650
+vigorous,精力的な 1651
+immense,莫大な 1652
+metropolitan,大都市の 1653
+punctual,時間をきっちり守る 1654
+solitary,孤独な 1655
+collective,集団 1656
+diplomatic,外交の 1657
+nasty,不快な 1658
+helpless,無力な 1659
+explicit,明確な、はっきりした 1660
+bankrupt,破産した 1661
+eternal,永遠の 1662
+sole,唯一の 1663
+sour,すっぱい 1664
+notable,注目すべき 1665
+affluent,裕福な 1666
+naked,裸の 1667
+vocal,発声 1668
+feminine,女性の 1669
+vacant,空いている 1670
+exotic,外来の 1671
+rigid,厳格な 1672
+humid,蒸し暑い 1673
+outstanding,傑出した 1674
+addicted,中毒である 1675
+vulnerable,受けやすい 1676
+spontaneous,自然に起こる 1677
+greedy,貪欲な 1678
+trivial,ささいな 1679
+per capita,一人当たりの 1680
+inherent,元から伴う 1681
+promising,前途有望な 1682
+physiological,生理的な 1683
+clinical,臨床 1684
+chronic,慢性の 1685
+geological,地質学的な 1686
+countless,無数の 1687
+innate,先天的な 1688
+alert,用心する 1689
+autonomous,自動運転 1690
+simultaneously,同時に 1691
+utterly,まったく 1692
+drastically,劇的に 1693
+necessarily,必ずしも 1694
+thereby,そうすることで 1695
+frankly,率直に 1696
+namely,すなわち 1697
+hence,だから 1698
+via,経由で 1699
+owing,のために 1700
+clarify,明らかにする 1701
+smash,粉々に砕く 1702
+mourn,悲しむ 1703
+summon,呼ぶ 1704
+shatter,粉々にする 1705
+linger,残る 1706
+lament,嘆く 1707
+endowed,恵まれる 1708
+rejoice,喜ぶ 1709
+allocate,配分する 1710
+slap,ピシャリと打つ 1711
+contend,主張する 1712
+swear,誓う 1713
+discern,識別する 1714
+degrade,悪化させる 1715
+erect,築く 1716
+testify,証言する 1717
+spur,駆りたてる 1718
+roam,歩き回る 1719
+frown,まゆをひそめる 1720
+lure,呼び込む 1721
+defy,逆らう 1722
+stroll,ぶらつく 1723
+rattle,がたがた鳴らす 1724
+reconcile,調和させる 1725
+blur,ぼやかす 1726
+soothe,ななめる 1727
+impair,低下させる 1728
+comply,従う 1729
+pierce,穴をあける 1730
+stumble,つまずく 1731
+hinder,さまたげる 1732
+mock,あざける 1733
+embody,具現する 1734
+stalk,忍び寄る 1735
+proclaim,宣言する 1736
+applaud,拍手する 1737
+inflict,与える 1738
+merge,合併する 1739
+evacuations,避難した 1740
+undone,元に戻る 1741
+poke,突く 1742
+haunted,つきまとわれる 1743
+adhere,固く守る 1744
+compile,まとめる 1745
+wither,しぼむ 1746
+stun,びっくりさせる 1747
+choke,のどがつまる 1748
+deteriorate,悪化する 1749
+dump,捨てる 1750
+murmur,つぶやく 1751
+delete,削除する 1752
+inhibit,阻害する 1753
+divert,そらす 1754
+tame,飼いならす 1755
+reap,手に入れる 1756
+affirm,断言する 1757
+immersed,浸る 1758
+expire,期限が切れる 1759
+embark,乗り出す 1760
+vow,誓う 1761
+foresee,予知する 1762
+adore,崇拝する 1763
+yearn,切望する 1764
+undermine,弱める 1765
+suck,吸う 1766
+pledge,誓う 1767
+intrude,立ち入る 1768
+sue,訴える 1769
+distort,歪曲する 1770
+extinguish,消す 1771
+preach,説教する 1772
+curb,抑制する 1773
+withstand,耐える 1774
+dip,浸す 1775
+recite,暗唱する 1776
+thrust,押し込む 1777
+plead,嘆願する 1778
+humiliate,恥をかかせる 1779
+discharge,放出する 1780
+condemn,非難する 1781
+retrieve,検索する 1782
+shrug,肩をすくめる 1783
+evoke,呼び起こす 1784
+fetch,取ってくる 1785
+flatter,お世辞を言う 1786
+prose,散文 1787
+textile,織物 1788
+timber,材木 1789
+masterpiece,傑作 1790
+riot,暴動 1791
+carriage,車両 1792
+apparatus,装置 1793
+fuss,大騒ぎ 1794
+deficiency,欠乏 1795
+heir,相続人 1796
+equator,赤道 1797
+petroleum,石油 1798
+witch,魔女 1799
+vapor,蒸気 1800
+probe,探査機 1801
+expertise,専門知識 1802
+scorn,軽蔑 1803
+prophet,預言者 1804
+breeze,そよ風 1805
+sin,罪 1806
+surge,急増 1807
+complement,補うもの 1808
+queue,列 1809
+stake,賭け金 1810
+ambassador,大使 1811
+jury,陪審員 1812
+cluster,集団 1813
+lump,こぶ 1814
+meadow,牧草地 1815
+feat,偉業 1816
+temperament,気質 1817
+chill,寒気 1818
+appliance,器具 1819
+predecessor,前任者 1820
+entity,存在 1821
+hospitality,もてなし 1822
+narrative,話 1823
+segment,部分、区分 1824
+catastrophe,大災害 1825
+monarch,君主、皇帝 1826
+constraint,制約 1827
+amendment,改正、修正 1828
+cosmos,宇宙 1829
+aisle,通路 1830
+hierarchy,階級制度 1831
+toll,通行料 1832
+transaction,取引 1833
+burglar,強盗 1834
+tyranny,圧政 1835
+parasite,寄生生物 1836
+intuition,直感 1837
+communist,共産主義の 1838
+legacy,遺産 1839
+vein,静脈 1840
+discourse,論説 1841
+dairy,乳製品、酪農 1842
+artifact,工芸品 1843
+outlet,はけ口 1844
+apprehension,不安 1845
+melancholy,憂うつ 1846
+novelty,目新しさ 1847
+specimen,標本 1848
+hygiene,衛生 1849
+tactics,戦術 1850
+monopoly,独占 1851
+token,印 1852
+aristocracy,貴族階級 1853
+revenge,復讐 1854
+activist,活動家 1855
+rhetoric,美辞麗句 1856
+entrepreneur,起業家 1857
+census,国勢調査 1858
+verge,瀬戸際 1859
+advent,出現、到来 1860
+analogy,類似点 1861
+irrigation,灌漑 1862
+coverage,報道 1863
+cuisine,料理 1864
+menace,脅威 1865
+peril,危険 1866
+limb,手足 1867
+assault,攻撃 1868
+hatred,憎しみ 1869
+autonomy,自主性 1870
+cram,塾 1871
+subsidy,補助金 1872
+empathy,共感 1873
+slang,俗語 1874
+posture,姿勢 1875
+ideology,イデオロギー 1876
+curse,災いのもと 1877
+tumor,腫瘍 1878
+intersection,交差点 1879
+duration,期間 1880
+deforestation,森林破壊 1881
+precaution,用心 1882
+bunch,ひとたばの 1883
+shortcoming,欠点 1884
+aspiration,熱望 1885
+psychiatrist,精神科医 1886
+shipping,発送 1887
+senator,上院議員 1888
+statesman,政治家 1889
+subordinate,部下 1890
+vacuum,空白 1891
+quest,探究 1892
+meditation,瞑想 1893
+subscriber,加入者 1894
+riddle,謎 1895
+rag,ぼろ 1896
+rust,さび 1897
+sanitation,衛生 1898
+midst,まっただ中 1899
+mischief,いたずら 1900
+proficiency,検定 1901
+recollection,記憶 1902
+latitude,緯 1903
+friction,摩擦 1904
+botanist,植物学者 1905
+heredity,遺伝 1906
+contempt,軽蔑 1907
+anatomy,構造 1908
+integrity,誠実 1909
+cargo,貨物 1910
+bribe,わいろ 1911
+eruption,噴火 1912
+funeral,葬式 1913
+deficit,赤字 1914
+bulk,大部分 1915
+millionaire,百万長者 1916
+ash,灰 1917
+realm,領域 1918
+plantation,農園 1919
+plow,すき 1920
+vending,販売 1921
+orphan,孤児 1922
+neuron,神経細胞 1923
+vegetation,植生 1924
+warrior,戦士 1925
+mutation,突然変異 1926
+sewage,下水 1927
+paradigm,理論的枠組 1928
+protocol,議定書 1929
+skyscraper,高層ビル 1930
+accord,一致 1931
+bureaucrat,官僚 1932
+array,多彩 1933
+clash,衝突 1934
+torture,拷問 1935
+reign,統治 1936
+thesis,論文 1937
+digit,桁 1938
+agenda,課題 1939
+onset,発症 1940
+peasant,小作農 1941
+ultraviolet,紫外 1942
+renowned,有名な 1943
+transparent,透き通った 1944
+dim,薄暗い 1945
+legitimate,正当な 1946
+adverse,悪 1947
+swift,すばやい 1948
+naive,世間知らずの 1949
+dumb,ばか 1950
+gloomy,暗い 1951
+furious,激怒した 1952
+earnest,まじめな 1953
+terrific,すばらしい 1954
+vertical,垂直な 1955
+wicked,邪悪な 1956
+subjective,主観的な 1957
+enlightened,進んだ考えの 1958
+authentic,本物の 1959
+brutal,残忍な 1960
+dizzy,めまい 1961
+sheer,まったくの 1962
+naughty,いたずらな 1963
+damp,湿った 1964
+static,静的な 1965
+doomed,運命にある 1966
+respiratory,呼吸器に関する、呼吸の 1967
+innumerable,無数の 1968
+clumsy,不器用な 1969
+aesthetic,美的 1970
+obsessed,とりつかれている 1971
+detached,切り離された 1972
+wrecked,難破した 1973
+reckless,無謀な 1974
+arrogant,傲慢な 1975
+preoccupied,頭がいっぱいだ 1976
+gigantic,巨大な 1977
+conspicuous,顕著な 1978
+slender,すらりとした 1979
+manifest,明らかな 1980
+tidy,きちんと 1981
+skeptical,懐疑的な 1982
+notorious,悪名高い 1983
+anonymous,匿名の 1984
+monotonous,単調な 1985
+ample,豊富に 1986
+trim,こぎれいな 1987
+savage,野蛮な 1988
+coherent,一貫した 1989
+eloquent,雄弁な 1990
+foul,不快な 1991
+juvenile,青少年の 1992
+compulsory,義務的な 1993
+prone,やすい 1994
+arbitrary,勝手な 1995
+ingenious,独創的な 1996
+divine,神聖なる 1997
+tender,やさしい 1998
+outraged,憤慨している 1999
+intrinsic,本来の 2000
+paralyzed,麻痺している 2001
+compatible,適合する 2002
+patriotic,愛国的な 2003
+eminent,名高い 2004
+potent,強力な 2005
+insane,正気を失っている 2006
+staple,主要な 2007
+secondhand,間接 2008
+indigenous,先住 2009
+utmost,最も 2010
+integral,不可欠な 2011
+intricate,複雑な 2012
+demographic,人口統計の 2013
+mighty,強力な 2014
+intact,無傷の 2015
+intent,決意をしている 2016
+intriguing,興味深い 2017
+merry,陽気な 2018
+perpetual,永続する 2019
+spinal,脊椎の 2020
+susceptible,かかりやすい 2021
+mandatory,義務的な 2022
+upright,まっすぐに 2023
+abruptly,不意に 2024
+conversely,逆に 2025
+predominantly,主に 2026
+lest,～しないように 2027
 </script>
 </body>
 </html>

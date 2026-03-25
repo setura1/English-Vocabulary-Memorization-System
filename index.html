@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes,viewport-fit=cover">
-    <title>システム英単語修行 極限管理版V2.8</title>
+    <title>システム英単語修行 極限管理版V2.9</title>
     <style>
         :root {
             --bg: #070b14;
@@ -33,7 +33,7 @@
         
         .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
         .input-group { background: #1f2937; padding: 10px; border-radius: 12px; border: 1px solid #374151; }
-        .input-group span { font-size: 10px; display: block; margin-bottom: 5px; color: #9ca3af; }
+        .input-group span { font-size: 10px; display: block; margin-bottom: 4px; color: #9ca3af; }
         
         input { 
             width: 100%; background: transparent; border: none; color: white; 
@@ -47,8 +47,8 @@
         button.main-btn:active { transform: scale(0.98); }
         
         #card { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; text-align: center; }
-        #englishWord { font-size: 48px; font-weight: 900; letter-spacing: -1px; line-height: 1.1; word-break: break-all; }
-        #japaneseWord { font-size: 22px; margin-top: 20px; color: var(--primary); font-weight: bold; opacity: 0; min-height: 1.5em; }
+        #englishWord { font-size: 52px; font-weight: 900; letter-spacing: -2px; line-height: 1.1; word-break: break-all; }
+        #japaneseWord { font-size: 24px; margin-top: 20px; color: var(--primary); font-weight: bold; opacity: 0; min-height: 1.5em; }
         #japaneseWord.visible { opacity: 1; }
         
         .progress-container { width: 100%; height: 6px; background: #1f2937; border-radius: 3px; overflow: hidden; margin: 10px 0; }
@@ -80,7 +80,7 @@
                 <div class="input-group"><span>終了ID</span><input type="number" id="rangeEnd" value="2027" pattern="\d*" inputmode="numeric"></div>
             </div>
             <div class="input-group" style="background: rgba(255,255,255,0.1);">
-                <span>修行する問題数（指定数に達すると終了）</span>
+                <span>修行数（指定数に達すると終了）</span>
                 <input type="number" id="testLimit" value="100" pattern="\d*" inputmode="numeric">
             </div>
         </div>
@@ -90,18 +90,18 @@
             <button id="ttsToggle" class="toggle-btn active" onclick="toggleTTS()">読み上げON</button>
         </div>
         <div class="param-grid">
-            <div class="input-group"><span>速度</span><input type="number" id="speechRate" value="1.6" step="0.1" inputmode="decimal"></div>
-            <div class="input-group"><span>発音間隔(秒)</span><input type="number" id="voiceGap" value="0.0" step="0.1" inputmode="decimal"></div>
+            <div class="input-group"><span>速度</span><input type="number" id="speechRate" value="1.5" step="0.1" inputmode="decimal"></div>
+            <div class="input-group"><span>音声間隔(秒)</span><input type="number" id="voiceGap" value="0.0" step="0.1" inputmode="decimal"></div>
         </div>
 
-        <div class="label">時間管理(秒)</div>
+        <div class="label">時間調整(秒)</div>
         <div class="param-grid">
             <div class="input-group"><span>想起待ち</span><input type="number" id="engTime" value="1.2" step="0.1" inputmode="decimal"></div>
             <div class="input-group"><span>解答制限</span><input type="number" id="japTime" value="1.5" step="0.1" inputmode="decimal"></div>
         </div>
 
-        <div class="label">暗記数値データ</div>
-        <textarea id="importArea" placeholder="数値をここに貼り付け"></textarea>
+        <div class="label">暗記数値インポート</div>
+        <textarea id="importArea" placeholder="数値を貼り付け"></textarea>
 
         <button class="main-btn" onclick="startTraining()">修行開始</button>
     </div>
@@ -121,7 +121,7 @@
         <button id="wrongBtn" class="ans-btn" onclick="processAnswer(false)">苦手(A)</button>
         <button id="correctBtn" class="ans-btn" onclick="processAnswer(true)">正解(Z)</button>
     </div>
-    <button onclick="finishTraining()" style="background:none; border:none; color:var(--gray); font-size:12px;">終了 (Space)</button>
+    <button onclick="finishTraining()" style="background:none; border:none; color:var(--gray); font-size:12px;">中断 (Space)</button>
 </div>
 
 <div id="report">
@@ -143,7 +143,7 @@
 </div>
 
 <script>
-/** スマホ画面自動リセット機能（1秒後） **/
+/** 1秒後に自動ズームリセット **/
 let zoomResetTimer;
 function autoResetZoom() {
     clearTimeout(zoomResetTimer);
@@ -167,7 +167,6 @@ let timers = { eng: null, jap: null };
 let importedIds = new Set();
 let sessionStart = null;
 let sessionEnd = null;
-let totalTestCount = 0; // 今回の修行総数
 
 window.onload = () => {
     const raw = document.getElementById('words-data').textContent.trim();
@@ -183,6 +182,8 @@ window.onload = () => {
             mastery[id] = { lv: 0, iv: 1 };
         }
     });
+    // 読み上げ音声をあらかじめロード（ブラウザ対策）
+    window.speechSynthesis.getVoices();
 };
 
 function toggleTTS() {
@@ -211,10 +212,8 @@ function startTraining() {
         });
     }
 
-    // 1. 範囲内の単語からLv10を除外
     let available = WORDS.filter(w => w.id >= startNum && w.id <= endNum && mastery[w.id].lv < 10);
 
-    // 2. ソート: 学習中を優先 > SRS優先度
     available.sort((a, b) => {
         const isAImp = importedIds.has(a.id) ? 0 : 1;
         const isBImp = importedIds.has(b.id) ? 0 : 1;
@@ -222,10 +221,7 @@ function startTraining() {
         return (mastery[a.id].iv - mastery[a.id].lv) - (mastery[b.id].iv - mastery[b.id].lv) || Math.random() - 0.5;
     });
 
-    // 3. 予定個数だけ切り出し
     queue = available.slice(0, testLimit);
-    totalTestCount = queue.length;
-
     if (queue.length === 0) return alert("対象が見つかりません。");
 
     results = [];
@@ -240,11 +236,12 @@ function nextWord() {
 
     activeWord = queue.shift();
     const currentNum = results.length + 1;
+    const totalNum = results.length + queue.length + 1;
     
     document.getElementById("infoText").innerHTML = 
-        `ID:${activeWord.id} (Lv:${mastery[activeWord.id].lv}) | ${currentNum} / ${totalTestCount} <span id="remainingCounter">(残り ${totalTestCount - currentNum}語)</span>`;
+        `ID:${activeWord.id} (Lv:${mastery[activeWord.id].lv}) | ${currentNum} / ${totalNum} <span id="remainingCounter">(残り ${queue.length}語)</span>`;
     
-    document.getElementById("progressBar").style.width = `${(results.length / totalTestCount) * 100}%`;
+    document.getElementById("progressBar").style.width = `${(results.length / totalNum) * 100}%`;
     document.getElementById("englishWord").textContent = activeWord.en;
     const jaEl = document.getElementById("japaneseWord");
     jaEl.textContent = activeWord.ja;
@@ -254,15 +251,29 @@ function nextWord() {
     timers.eng = setTimeout(showAnswer, parseFloat(document.getElementById('engTime').value) * 1000);
 }
 
+/** 綺麗に読み上げるためのコアロジック **/
 function speakChain(en, ja) {
     speechSynthesis.cancel();
     const rate = parseFloat(document.getElementById('speechRate').value);
     const gap = parseFloat(document.getElementById('voiceGap').value);
+
+    // 英語の設定
     const uEn = new SpeechSynthesisUtterance(en);
-    uEn.lang = 'en-US'; uEn.rate = rate;
+    uEn.lang = 'en-US'; // 英語(米)
+    uEn.rate = rate;
+
+    // 日本語の設定
     const uJa = new SpeechSynthesisUtterance(ja);
-    uJa.lang = 'ja-JP'; uJa.rate = rate;
-    uEn.onend = () => { timers.voiceGap = setTimeout(() => { speechSynthesis.speak(uJa); }, gap * 1000); };
+    uJa.lang = 'ja-JP'; // 日本語
+    uJa.rate = rate;
+
+    // 英語が終わった後に日本語を再生
+    uEn.onend = () => {
+        timers.voiceGap = setTimeout(() => {
+            speechSynthesis.speak(uJa);
+        }, gap * 1000);
+    };
+
     speechSynthesis.speak(uEn);
 }
 
@@ -284,7 +295,7 @@ function processAnswer(isOk) {
     } else {
         m.lv = Math.max(-5, m.lv - 2);
         m.iv = 1;
-        // 「あっててもまちがってても次へ」の要件に基づき、queueへの再追加は行わない
+        // 間違えた単語を後で再出題しない（個数指定優先のため）
     }
     results.push({ ...activeWord, ok: isOk });
     nextWord();
@@ -315,7 +326,8 @@ function finishTraining() {
     const seconds = elapsed % 60;
 
     document.getElementById("resultScore").textContent = `${results.filter(r => r.ok).length} / ${results.length} (${accuracy}%)`;
-    const timeInfoText = `開始: ${formatDate(sessionStart)}<br>終了: ${formatDate(sessionEnd)}<br>経過: ${minutes}分${seconds}秒`;
+    
+    const timeInfoText = `開始: ${formatDate(sessionStart)}<br>終了: ${formatDate(sessionEnd)}<br>経過時間: ${minutes}分${seconds}秒`;
     document.getElementById("timeResultDisplay").innerHTML = timeInfoText;
 
     const copyHeader = `【修行記録】\n開始: ${formatDate(sessionStart)}\n終了: ${formatDate(sessionEnd)}\n正解率: ${accuracy}%\n--------------------\n`;

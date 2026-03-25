@@ -2,91 +2,158 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>システム英単語暗記 - 単語鉄壁修行</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+    <title>システム英単語暗記 修行版</title>
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --accent-color: #3498db;
-            --success-color: #27ae60;
-            --danger-color: #e74c3c;
-            --bg-color: #f4f7f6;
+            --bg: #0f172a;
+            --container: #1e293b;
+            --text: #f1f5f9;
+            --primary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --gray: #64748b;
+            --accent: #8b5cf6;
         }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; width: 100%; height: 100%; background: var(--bg); font-family: 'Helvetica Neue', Arial, sans-serif; color: var(--text); overflow: hidden; }
+        
+        #setup, #report { padding: 20px; height: 100vh; overflow-y: auto; display: none; }
+        #setup.active, #report.active { display: block; }
+        #app { display: none; position: fixed; inset: 0; background: var(--bg); flex-direction: column; padding: 20px; z-index: 100; }
+        #app.active { display: flex; }
 
-        body {
-            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            color: var(--primary-color);
-        }
+        .container { max-width: 650px; margin: 0 auto; background: var(--container); border-radius: 28px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { font-size: 20px; text-align: center; margin-bottom: 20px; font-weight: 900; }
+        .label { font-size: 13px; font-weight: 800; color: var(--gray); margin: 15px 0 6px 4px; }
+        
+        .param-group { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 16px; margin-bottom: 10px; border: 1px solid #334155; }
+        .param-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+        .param-title { font-size: 12px; font-weight: 800; color: var(--text); }
+        
+        .ctrl-btns { display: flex; align-items: center; gap: 8px; }
+        .val-display { min-width: 50px; text-align: center; font-family: monospace; font-weight: 900; font-size: 16px; color: var(--primary); }
+        .step-btn { width: 36px; height: 36px; background: #334155; border: none; border-radius: 10px; color: white; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .step-btn:active { background: var(--primary); }
 
-        /* --- UI Sections --- */
-        #setup-screen, #test-screen, #result-screen {
-            display: none;
-            flex-direction: column;
-            padding: 20px;
-            height: 100%;
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
+        .section-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 20px; }
+        .nav-item { font-size: 11px; padding: 8px 0; background: var(--gray); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .nav-item.selected { background: var(--primary); }
 
-        #setup-screen.active, #test-screen.active, #result-screen.active {
-            display: flex;
-        }
+        textarea { width: 100%; height: 80px; background: rgba(0,0,0,0.3); color: #94a3b8; border: 1px solid #334155; border-radius: 12px; padding: 10px; font-size: 12px; font-family: monospace; margin-top: 5px; }
 
-        h1, h2 { text-align: center; margin-bottom: 20px; }
+        button.main-btn { width: 100%; height: 58px; border: none; border-radius: 18px; font-size: 20px; font-weight: 900; cursor: pointer; background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); margin-top: 10px; }
+        
+        #card { flex: 1; background: var(--container); border-radius: 40px; margin: 20px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 30px; text-align: center; border: 2px solid #334155; }
+        #englishWord { font-size: 48px; font-weight: 900; letter-spacing: -1px; }
+        #japaneseWord { font-size: 28px; margin-top: 25px; color: var(--primary); font-weight: 700; min-height: 1.2em; opacity: 0; transition: opacity 0.1s; }
+        #japaneseWord.visible { opacity: 1; }
+        
+        .progress-container { width: 100%; height: 10px; background: #334155; border-radius: 5px; overflow: hidden; margin-top: 10px; }
+        #progressBar { height: 100%; background: var(--primary); width: 0%; transition: width 0.2s; }
+        
+        .ans-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; padding-bottom: 20px; }
+        .ans-btn { height: 74px; border: none; border-radius: 24px; color: white; font-size: 22px; font-weight: 900; cursor: pointer; }
+        #correctBtn { background: var(--success); }
+        #wrongBtn { background: var(--danger); }
+        
+        #gaugeContainer { position: absolute; bottom: 0; left: 0; width: 100%; height: 8px; background: rgba(255,255,255,0.05); }
+        #gauge { height: 100%; background: var(--danger); width: 0%; }
 
-        /* --- Setup Screen --- */
-        .config-group { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .range-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .range-btn { padding: 12px; border: 1px solid #ddd; border-radius: 5px; background: #fff; cursor: pointer; }
-        .range-btn.selected { background: var(--accent-color); color: white; border-color: var(--accent-color); }
-        textarea { width: 100%; height: 80px; margin-top: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; font-size: 12px; }
-
-        /* --- Test Screen --- */
-        #progress-bar { width: 100%; height: 8px; background: #ddd; border-radius: 4px; margin-bottom: 10px; }
-        #progress-fill { height: 100%; background: var(--accent-color); width: 0%; border-radius: 4px; transition: width 0.3s; }
-        #stats-mini { font-size: 14px; display: flex; justify-content: space-between; margin-bottom: 20px; }
-
-        #word-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-        #word-en { font-size: 42px; font-weight: bold; margin-bottom: 20px; word-break: break-all; }
-        #word-jp { font-size: 24px; color: var(--success-color); min-height: 1.5em; visibility: hidden; }
-        #word-jp.visible { visibility: visible; }
-
-        #control-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-bottom: 30px; }
-        .main-btn { height: 80px; font-size: 20px; font-weight: bold; border: none; border-radius: 15px; color: white; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
-        .main-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
-        #btn-know { background-color: var(--success-color); }
-        #btn-weak { background-color: var(--danger-color); }
-        #btn-stop { background-color: #7f8c8d; grid-column: span 2; height: 50px; }
-
-        /* --- Result Screen --- */
-        .copy-box { background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-        .copy-btn { width: 100%; padding: 12px; margin-top: 5px; background: var(--accent-color); color: white; border: none; border-radius: 5px; font-weight: bold; }
-
+        .result-box { margin-bottom: 20px; text-align: left; }
+        .copy-btn { width: 100%; height: 45px; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 8px; background: var(--accent); color: white; }
     </style>
 </head>
 <body>
 
-<script type="text/plain" id="words-data">
+<div id="setup" class="active">
+    <div class="container">
+        <h1>システム英単語暗記 修行</h1>
+        
+        <div class="label">修行範囲 (100語単位で複数選択)</div>
+        <div id="sectionContainer" class="section-grid"></div>
+
+        <div class="label">時間・速度管理</div>
+        <div class="param-group">
+            <div class="param-row">
+                <span class="param-title">読み上げ速度</span>
+                <div class="ctrl-btns">
+                    <button class="step-btn" onclick="changeParam('speechRate', -0.1)">-</button>
+                    <div id="disp_speechRate" class="val-display">1.6</div>
+                    <button class="step-btn" onclick="changeParam('speechRate', 0.1)">+</button>
+                </div>
+            </div>
+            <div class="param-row">
+                <span class="param-title">想起待ち(秒)</span>
+                <div class="ctrl-btns">
+                    <button class="step-btn" onclick="changeParam('engTime', -0.1)">-</button>
+                    <div id="disp_engTime" class="val-display">1.2</div>
+                    <button class="step-btn" onclick="changeParam('engTime', 0.1)">+</button>
+                </div>
+            </div>
+            <div class="param-row">
+                <span class="param-title">解答制限(秒)</span>
+                <div class="ctrl-btns">
+                    <button class="step-btn" onclick="changeParam('japTime', -0.1)">-</button>
+                    <div id="disp_japTime" class="val-display">1.5</div>
+                    <button class="step-btn" onclick="changeParam('japTime', 0.1)">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="label">暗記データの復元 (数値コピペ)</div>
+        <textarea id="importArea" placeholder="例 1:0:1,2:5:11..."></textarea>
+
+        <button class="main-btn" onclick="startTraining()">修行開始</button>
+    </div>
+</div>
+
+<div id="app">
+    <div id="infoText" style="text-align:center; font-weight:bold; color:var(--gray);"></div>
+    <div class="progress-container"><div id="progressBar"></div></div>
+    
+    <div id="card">
+        <div id="englishWord"></div>
+        <div id="japaneseWord"></div>
+        <div id="gaugeContainer"><div id="gauge"></div></div>
+    </div>
+
+    <div class="ans-btns">
+        <button id="wrongBtn" class="ans-btn" onclick="processAnswer(false)">苦手 (A)</button>
+        <button id="correctBtn" class="ans-btn" onclick="processAnswer(true)">わかる (Z)</button>
+    </div>
+    <button onclick="finishTraining()" style="background:none; border:none; color:var(--gray); cursor:pointer;">修行中断 (Space)</button>
+</div>
+
+<div id="report">
+    <div class="container" style="text-align:center;">
+        <h1>修行完了</h1>
+        <div id="resultScore" style="font-size:24px; font-weight:900; color:var(--success);"></div>
+        
+        <div class="result-box">
+            <div class="label">17-1. 間違った単語 (復習用)</div>
+            <textarea id="wrongWordsArea" readonly></textarea>
+            <button class="copy-btn" onclick="copyText('wrongWordsArea')">間違った単語をコピー</button>
+        </div>
+
+        <div class="result-box">
+            <div class="label">17-2. 暗記っぽい数値 (保存用)</div>
+            <textarea id="numericalArea" readonly></textarea>
+            <button class="copy-btn" onclick="copyText('numericalArea')">数値データをコピー</button>
+        </div>
+
+        <button class="main-btn" onclick="location.reload()">トップに戻る</button>
+    </div>
+</div>
+
+<script type="text/plain" id="words-raw">
 follow,～の後に続く/～に従う1
 consider,～を考慮する2
 increase,増える/～を増やす3
 expect,～を予期する4
 decide,～することを決意する5
 develop,発達する/～を発達させる6
-provide,～を供給する/与える7
+provide,～を供給する/を与える7
 continue,続く/～を続ける8
 include,～を含む/含める9
 remain,ままでいる10
@@ -280,7 +347,7 @@ economy,経済197
 track,小道/足跡198
 transportation,交通機関/輸送199
 official,役人200
-sight,見ること、光景、視力201
+sight,見すること、光景、視力201
 taste,味、好み202
 range,範囲203
 appointment,約束、予約204
@@ -703,7 +770,7 @@ lean,よりかかる、もたれる620
 substitute,～を代わりに用いる621
 trace,～の跡をたどる622
 interrupt,～を妨げる623
-confront,～の前に立ちふさがる、～に立ち向かう624
+confront,～の前に立ちふさががる、～に立ち向かう624
 illustrate,～を（例で）示す625
 arrest,～を逮捕する626
 stimulate,～を刺激する627
@@ -926,7 +993,7 @@ precisely,正確に、まさに、ちょうど843
 meanwhile,その間に844
 altogether,完全に845
 lately,最近846
-barely,かろうじて847
+barely,かローじて847
 scarcely,ほとんど～ない848
 accordingly,それ相応に849
 deliberately,わざと850
@@ -1427,7 +1494,7 @@ rub,こする1344
 dispose,処理する1345
 refrain,控える1346
 accumulate,蓄積する1347
-boost,活気がつける1348
+boost,活気づける1348
 drag,引きずる1349
 revise,修正する1350
 scratch,かく1351
@@ -1577,7 +1644,7 @@ ratio,比率1494
 sword,剣1495
 whistle,笛1496
 sentiment,感情1497
-chore,雑用1498
+chore,雜用1498
 courtesy,礼儀1499
 mayor,市長1500
 surveillance,監視、見張り1501
@@ -1806,7 +1873,7 @@ stroll,ぶらつく1723
 rattle,がたがた鳴らす1724
 reconcile,調和させる1725
 blur,ぼやかす1726
-soothe,なだめる1727
+soothe,ななめる1727
 impair,低下させる1728
 comply,従う1729
 pierce,穴をあける1730
@@ -2109,306 +2176,211 @@ predominantly,主に2026
 lest,～しないように2027
 </script>
 
-<div id="setup-screen" class="active">
-    <h1>単語鉄壁修行</h1>
-    <div class="config-group">
-        <h3>修行範囲を選択 (100語単位)</h3>
-        <div id="range-selector" class="range-grid"></div>
-    </div>
-    
-    <div class="config-group">
-        <h3>暗記データのインポート (1:0:1,...)</h3>
-        <textarea id="import-data" placeholder="前回の修行データをここに貼り付け"></textarea>
-    </div>
-
-    <div class="config-group">
-        <h3>時間設定 (秒)</h3>
-        <label>英語表示: <input type="number" id="time-en" value="1.5" step="0.1" style="width:50px"></label><br>
-        <label>解答制限: <input type="number" id="time-ans" value="2.0" step="0.1" style="width:50px"></label>
-    </div>
-
-    <button onclick="startSession()" class="main-btn" style="background:var(--accent-color); width:100%; height:60px;">修行開始</button>
-</div>
-
-<div id="test-screen">
-    <div id="progress-bar"><div id="progress-fill"></div></div>
-    <div id="stats-mini">
-        <span id="stat-count">0/0</span>
-        <span id="stat-ok" style="color:var(--success-color)">正解: 0</span>
-        <span id="stat-ng" style="color:var(--danger-color)">不正解: 0</span>
-    </div>
-
-    <div id="word-container">
-        <div id="word-en">Word</div>
-        <div id="word-jp">日本語</div>
-    </div>
-
-    <div id="control-panel">
-        <button id="btn-weak" class="main-btn" onclick="handleInput(false)">苦手 (A)</button>
-        <button id="btn-know" class="main-btn" onclick="handleInput(true)">わかる (Z)</button>
-        <button id="btn-stop" class="main-btn" onclick="endSession()">修行停止 (Space)</button>
-    </div>
-</div>
-
-<div id="result-screen">
-    <h2>修行完了</h2>
-    <div id="result-stats" class="config-group"></div>
-
-    <div class="copy-box">
-        <h3>17-1. 間違った単語コピー (復習用)</h3>
-        <textarea id="output-wrong" readonly></textarea>
-        <button class="copy-btn" onclick="copyToClipboard('output-wrong')">コピー</button>
-    </div>
-
-    <div class="copy-box">
-        <h3>17-2. 暗記っぽい数値コピー (保存用)</h3>
-        <textarea id="output-numerical" readonly></textarea>
-        <button class="copy-btn" onclick="copyToClipboard('output-numerical')">コピー</button>
-    </div>
-
-    <button onclick="location.reload()" class="main-btn" style="background:#7f8c8d; width:100%; height:60px;">トップに戻る</button>
-</div>
-
 <script>
-/* --- 4. 基本構成 / 6. データ仕様 --- */
-let allWords = [];
-let masteryData = {}; // {id: {level, interval}}
+/* --- 定数とデータ --- */
+const WORDS = [];
+const mastery = {}; // { id: {lv, iv} }
+let params = { speechRate: 1.6, engTime: 1.2, japTime: 1.5 };
+let selectedRanges = new Set();
 let sessionQueue = [];
-let sessionWrongList = [];
-let currentIdx = -1;
-let stats = { ok: 0, ng: 0, start: null };
-let timerEn = null;
-let timerAns = null;
-let isWaitingInput = false;
+let sessionResults = [];
+let activeWord = null;
+let timers = { eng: null, jap: null };
 
-// 初期化：単語帳のパース
-function init() {
-    const raw = document.getElementById('words-data').textContent.trim();
-    const lines = raw.split('\n');
-    lines.forEach((line, index) => {
-        // 形式: 英語,日本語番号 (要件に基づきカンマまたはタブ対応)
-        const parts = line.split(/[,\t]/);
+/* --- 初期化 --- */
+window.onload = () => {
+    // 単語データの読み込み
+    const raw = document.getElementById('words-raw').textContent.trim();
+    raw.split('\n').forEach(line => {
+        const parts = line.split(',');
         if (parts.length < 2) return;
-        
         const en = parts[0].trim();
-        const jpFull = parts[1].trim();
-        // 日本語の後ろの番号を抽出
-        const match = jpFull.match(/^(.*?)(\d+)$/);
-        if (match) {
-            const id = parseInt(match[2]);
-            allWords.push({ id, en, jp: match[1], full: line });
-            // 7-6. 初期値
-            masteryData[id] = { level: 0, interval: 1 };
+        const jaFull = parts[1].trim();
+        const m = jaFull.match(/^(.*?)(\d+)$/);
+        if (m) {
+            const id = parseInt(m[2]);
+            WORDS.push({ id, en, ja: m[1], raw: line });
+            mastery[id] = { lv: 0, iv: 1 };
         }
     });
 
-    // 10. 範囲指定ボタン生成
-    const rangeDiv = document.getElementById('range-selector');
-    for (let i = 0; i < allWords.length; i += 100) {
-        const start = i + 1;
-        const end = Math.min(i + 100, allWords.length);
-        const btn = document.createElement('button');
-        btn.className = 'range-btn';
-        btn.textContent = `${start}-${end}`;
-        btn.onclick = () => btn.classList.toggle('selected');
-        rangeDiv.appendChild(btn);
+    // 範囲選択ボタンの生成
+    const nav = document.getElementById("sectionContainer");
+    for (let i = 1; i <= WORDS.length; i += 100) {
+        const end = Math.min(i + 99, WORDS.length);
+        const btn = document.createElement("button");
+        btn.className = "nav-item";
+        btn.textContent = `${i}-${end}`;
+        btn.onclick = () => {
+            if (selectedRanges.has(i)) {
+                selectedRanges.delete(i);
+                btn.classList.remove('selected');
+            } else {
+                selectedRanges.add(i);
+                btn.classList.add('selected');
+            }
+        };
+        nav.appendChild(btn);
     }
+    updateDisplays();
+};
+
+/* --- パラメータ管理 --- */
+function changeParam(key, step) {
+    params[key] = parseFloat((params[key] + step).toFixed(1));
+    if (params[key] < 0.1) params[key] = 0.1;
+    updateDisplays();
 }
 
-/* --- 8. 暗記ロジック & 9. 出題アルゴリズム --- */
-function startSession() {
-    // インポート処理
-    const impStr = document.getElementById('import-data').value.trim();
-    if (impStr) {
-        // 18-2. 解析 (カンマまたは改行)
-        const entries = impStr.split(/[,\n]/);
-        entries.forEach(e => {
-            const [id, lv, iv] = e.split(':').map(Number);
-            if (masteryData[id]) {
-                masteryData[id].level = lv;
-                masteryData[id].interval = iv;
-            }
-        });
-    }
-
-    // 範囲選択の取得
-    const selectedRanges = [];
-    document.querySelectorAll('.range-btn.selected').forEach(btn => {
-        const [s, e] = btn.textContent.split('-').map(Number);
-        selectedRanges.push({s, e});
+function updateDisplays() {
+    Object.keys(params).forEach(k => {
+        const el = document.getElementById(`disp_${k}`);
+        if (el) el.textContent = params[k];
     });
+}
 
-    if (selectedRanges.length === 0) {
+/* --- 修行ロジック --- */
+function startTraining() {
+    if (selectedRanges.size === 0) {
         alert("範囲を選択してください");
         return;
     }
 
-    // セッション対象の抽出
-    sessionQueue = allWords.filter(w => 
-        selectedRanges.some(r => w.id >= r.s && w.id <= r.e)
-    );
+    // 数値データのインポート
+    const impText = document.getElementById('importArea').value.trim();
+    if (impText) {
+        impText.split(/[,\n]/).forEach(entry => {
+            const [id, lv, iv] = entry.split(':').map(Number);
+            if (mastery[id]) {
+                mastery[id] = { lv: lv || 0, iv: iv || 1 };
+            }
+        });
+    }
 
-    // 9-2. 優先度計算 (interval - level) & 9-3. シャッフル
-    sessionQueue.sort((a, b) => {
-        const pA = masteryData[a.id].interval - masteryData[a.id].level;
-        const pB = masteryData[b.id].interval - masteryData[b.id].level;
-        if (pA === pB) return Math.random() - 0.5;
-        return pA - pB;
+    // キュー作成
+    sessionQueue = WORDS.filter(w => {
+        const base = Math.floor((w.id - 1) / 100) * 100 + 1;
+        return selectedRanges.has(base);
     });
 
-    stats = { ok: 0, ng: 0, total: sessionQueue.length, start: new Date() };
-    sessionWrongList = [];
-    currentIdx = -1;
-    
-    document.getElementById('setup-screen').classList.remove('active');
-    document.getElementById('test-screen').classList.add('active');
+    // SRSアルゴリズム: (interval - level) でソート
+    sessionQueue.sort((a, b) => {
+        const scoreA = mastery[a.id].iv - mastery[a.lv];
+        const scoreB = mastery[b.id].iv - mastery[b.lv];
+        if (scoreA === scoreB) return Math.random() - 0.5;
+        return scoreA - scoreB;
+    });
+
+    sessionResults = [];
+    document.getElementById("setup").classList.remove('active');
+    document.getElementById("app").classList.add('active');
     nextWord();
 }
 
-/* --- 11. テスト進行仕様 --- */
 function nextWord() {
-    clearTimeout(timerEn);
-    clearTimeout(timerAns);
-    currentIdx++;
+    clearTimeout(timers.eng);
+    clearTimeout(timers.jap);
+    
+    if (sessionQueue.length === 0) return finishTraining();
 
-    if (currentIdx >= sessionQueue.length) {
-        endSession();
-        return;
-    }
+    activeWord = sessionQueue.shift();
+    const total = sessionResults.length + sessionQueue.length + 1;
+    document.getElementById("infoText").textContent = `${sessionResults.length + 1} / ${total}`;
+    document.getElementById("progressBar").style.width = `${(sessionResults.length / total) * 100}%`;
+    
+    const cardEn = document.getElementById("englishWord");
+    const cardJa = document.getElementById("japaneseWord");
+    cardEn.textContent = activeWord.en;
+    cardJa.textContent = activeWord.ja;
+    cardJa.classList.remove('visible');
 
-    const word = sessionQueue[currentIdx];
-    const enEl = document.getElementById('word-en');
-    const jpEl = document.getElementById('word-jp');
+    const gauge = document.getElementById("gauge");
+    gauge.style.transition = "none";
+    gauge.style.width = "0%";
 
-    // 初期化
-    enEl.textContent = word.en;
-    jpEl.textContent = word.jp;
-    jpEl.classList.remove('visible');
-    isWaitingInput = false;
+    speak(activeWord.en, "en-US");
 
-    updateUI();
-
-    // 11-2. 想起フェーズ
-    const timeEn = parseFloat(document.getElementById('time-en').value) * 1000;
-    timerEn = setTimeout(() => {
-        showAnswer();
-    }, timeEn);
+    timers.eng = setTimeout(showAnswer, params.engTime * 1000);
 }
 
 function showAnswer() {
-    const jpEl = document.getElementById('word-jp');
-    jpEl.classList.add('visible');
-    isWaitingInput = true;
-    
-    // 15. 読み上げ
-    speak(sessionQueue[currentIdx].en);
+    document.getElementById("japaneseWord").classList.add('visible');
+    speak(activeWord.ja, "ja-JP");
 
-    // 11-4. 判定フェーズ (解答制限時間)
-    const timeAns = parseFloat(document.getElementById('time-ans').value) * 1000;
-    timerAns = setTimeout(() => {
-        if (isWaitingInput) handleInput(false); // 11-4. 自動苦手
-    }, timeAns);
+    const gauge = document.getElementById("gauge");
+    gauge.style.transition = `width ${params.japTime}s linear`;
+    gauge.style.width = "100%";
+
+    timers.jap = setTimeout(() => processAnswer(false), params.japTime * 1000);
 }
 
-/* --- 8-2. 更新規則 --- */
-function handleInput(isKnow) {
-    if (!isWaitingInput && isKnow) return; // 表示前に「わかる」は無効
-    if (!isWaitingInput && !isKnow) { // 想起中に「苦手」なら即表示
-        clearTimeout(timerEn);
-        showAnswer();
-        return;
-    }
+function processAnswer(isCorrect) {
+    clearTimeout(timers.eng);
+    clearTimeout(timers.jap);
 
-    isWaitingInput = false;
-    clearTimeout(timerAns);
-
-    const word = sessionQueue[currentIdx];
-    let m = masteryData[word.id];
-
-    if (isKnow) {
-        stats.ok++;
-        m.level = Math.min(10, m.level + 1);
-        m.interval = m.interval * 2 + 1;
+    const m = mastery[activeWord.id];
+    if (isCorrect) {
+        m.lv = Math.min(10, m.lv + 1);
+        m.iv = m.iv * 2 + 1;
     } else {
-        stats.ng++;
-        m.level = Math.max(-5, m.level - 2);
-        m.interval = 1;
-        sessionWrongList.push(word);
-        // 9-4. セッション中再出題
-        sessionQueue.push(word);
+        m.lv = Math.max(-5, m.lv - 2);
+        m.iv = 1;
+        // 苦手な場合は最後尾に再追加（セッション内復習）
+        sessionQueue.push(activeWord);
     }
 
+    sessionResults.push({ ...activeWord, ok: isCorrect });
     nextWord();
 }
 
-/* --- 17. コピペ出力機能 --- */
-function endSession() {
-    const end = new Date();
-    const diff = Math.floor((end - stats.start) / 1000);
-    
-    document.getElementById('test-screen').classList.remove('active');
-    document.getElementById('result-screen').classList.add('active');
+/* --- 終了と出力 --- */
+function finishTraining() {
+    document.getElementById("app").classList.remove('active');
+    document.getElementById("report").classList.add('active');
 
-    // 結果表示
-    document.getElementById('result-stats').innerHTML = `
-        開始: ${stats.start.toLocaleTimeString()}<br>
-        終了: ${end.toLocaleTimeString()}<br>
-        経過: ${diff}秒<br>
-        正解: ${stats.ok} / 不正解: ${stats.ng}<br>
-        正答率: ${((stats.ok / (stats.ok + stats.ng)) * 100 || 0).toFixed(1)}%
-    `;
+    const missed = sessionResults.filter(r => !r.ok);
+    const correctCount = sessionResults.filter(r => r.ok).length;
+    const accuracy = ((correctCount / sessionResults.length) * 100 || 0).toFixed(1);
 
-    // 17-1. 間違った単語 (重複削除して出力)
-    const uniqueWrongs = Array.from(new Set(sessionWrongList.map(w => w.full)));
-    document.getElementById('output-wrong').value = uniqueWrongs.join('\n');
+    document.getElementById("resultScore").textContent = `正解: ${correctCount} / ${sessionResults.length} (${accuracy}%)`;
 
-    // 17-2. 暗記っぽい数値 (全データ)
-    const numData = Object.keys(masteryData).map(id => {
-        const d = masteryData[id];
-        return `${id}:${d.level}:${d.interval}`;
+    // 17-1. 間違った単語コピー（重複削除）
+    const uniqueMissed = Array.from(new Set(missed.map(m => m.raw)));
+    document.getElementById("wrongWordsArea").value = uniqueMissed.join('\n');
+
+    // 17-2. 数値データコピー
+    const numericalData = Object.keys(mastery).map(id => {
+        const d = mastery[id];
+        return `${id}:${d.lv}:${d.iv}`;
     }).join(',');
-    document.getElementById('output-numerical').value = numData;
+    document.getElementById("numericalArea").value = numericalData;
 }
 
-/* --- Utilities --- */
-function updateUI() {
-    const progress = (currentIdx / sessionQueue.length) * 100;
-    document.getElementById('progress-fill').style.width = `${progress}%`;
-    document.getElementById('stat-count').textContent = `${currentIdx + 1} / ${sessionQueue.length}`;
-    document.getElementById('stat-ok').textContent = `正解: ${stats.ok}`;
-    document.getElementById('stat-ng').textContent = `不正解: ${stats.ng}`;
-}
-
-function speak(text) {
-    if (!window.speechSynthesis) return;
-    const uttr = new SpeechSynthesisUtterance(text);
-    uttr.lang = 'en-US';
-    uttr.rate = 1.0;
+/* --- ユーティリティ --- */
+function speak(text, lang) {
     speechSynthesis.cancel();
-    speechSynthesis.speak(uttr);
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang;
+    u.rate = params.speechRate;
+    speechSynthesis.speak(u);
 }
 
-function copyToClipboard(id) {
+function copyText(id) {
     const el = document.getElementById(id);
     el.select();
     document.execCommand('copy');
     alert("コピーしました");
 }
 
-/* --- 14. キーボード操作 --- */
-window.addEventListener('keydown', (e) => {
-    if (document.getElementById('test-screen').classList.contains('active')) {
-        if (e.key.toLowerCase() === 'z') handleInput(true);
-        if (e.key.toLowerCase() === 'a') handleInput(false);
-        if (e.code === 'Space') {
-            e.preventDefault();
-            endSession();
-        }
+/* --- キー操作 --- */
+document.onkeydown = (e) => {
+    if (document.getElementById("app").classList.contains('active')) {
+        const k = e.key.toLowerCase();
+        if (k === "z") processAnswer(true);
+        if (k === "a") processAnswer(false);
+        if (e.code === "Space") finishTraining();
     }
-});
-
-// 起動
-init();
+};
 </script>
 </body>
 </html>

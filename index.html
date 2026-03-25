@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes,viewport-fit=cover">
-    <title>システム英単語修行 極限管理版V3.1</title>
+    <title>システム英単語修行 極限管理版V3.2</title>
     <style>
         :root {
             --bg: #070b14;
@@ -36,7 +36,7 @@
         .input-group span { font-size: 10px; display: block; margin-bottom: 5px; color: #9ca3af; }
         
         .adj-container { display: flex; align-items: center; gap: 8px; }
-        .adj-btn { background: #374151; color: white; border: none; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .adj-btn { background: #374151; color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .adj-btn:active { background: var(--primary); transform: scale(0.9); }
 
         input { 
@@ -209,7 +209,17 @@ window.onload = () => {
 function adjustValue(id, delta) {
     const el = document.getElementById(id);
     let val = parseInt(el.value) || 0;
-    val += delta;
+    
+    if (id === 'rangeStart' || id === 'rangeEnd') {
+        if (delta > 0) {
+            val = Math.floor((val + 99) / 100) * 100 + 1;
+        } else {
+            val = Math.floor((val - 2) / 100) * 100 + 1;
+        }
+    } else {
+        val += delta;
+    }
+
     if (val < 1) val = 1;
     if (id !== 'testLimit' && val > 2027) val = 2027;
     el.value = val;
@@ -278,10 +288,19 @@ function speakChain(en, ja) {
     speechSynthesis.cancel();
     const rate = parseFloat(document.getElementById('speechRate').value);
     const gap = parseFloat(document.getElementById('voiceGap').value);
+    
+    const voices = speechSynthesis.getVoices();
+    const enVoice = voices.find(v => v.lang.startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
+
     const uEn = new SpeechSynthesisUtterance(en);
-    uEn.lang = 'en-US'; uEn.rate = rate;
+    uEn.lang = 'en-US'; 
+    uEn.rate = rate;
+    if (enVoice) uEn.voice = enVoice;
+
     const uJa = new SpeechSynthesisUtterance(ja);
-    uJa.lang = 'ja-JP'; uJa.rate = rate;
+    uJa.lang = 'ja-JP'; 
+    uJa.rate = rate;
+
     uEn.onend = () => { timers.voiceGap = setTimeout(() => { speechSynthesis.speak(uJa); }, gap * 1000); };
     speechSynthesis.speak(uEn);
 }
@@ -349,7 +368,6 @@ document.onkeydown = (e) => {
     if (e.code === "Space") { e.preventDefault(); finishTraining(); }
 };
 </script>
-
 
 <script type="text/plain" id="words-data">
 follow,～の後に続く/～に従う1

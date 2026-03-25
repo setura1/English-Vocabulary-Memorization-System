@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-    <title>システム英単語修行 極限入力版</title>
+    <title>システム英単語修行 極限管理版V2</title>
     <style>
         :root {
             --bg: #070b14;
@@ -16,7 +16,7 @@
             --accent: #7c3aed;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { margin: 0; width: 100%; height: 100%; background: var(--bg); font-family: 'Inter', system-ui, sans-serif; color: var(--text); overflow: hidden; }
+        html, body { margin: 0; width: 100%; height: 100%; background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); overflow: hidden; }
         
         #setup, #report { padding: 20px; height: 100vh; overflow-y: auto; display: none; }
         #setup.active, #report.active { display: block; }
@@ -24,21 +24,18 @@
         #app.active { display: flex; }
 
         .container { max-width: 600px; margin: 0 auto; background: var(--container); border-radius: 32px; padding: 24px; border: 1px solid #1f2937; }
-        h1 { font-size: 18px; text-align: center; margin-bottom: 20px; color: var(--primary); }
-        .label { font-size: 12px; font-weight: bold; color: var(--gray); margin: 15px 0 5px 4px; display: flex; justify-content: space-between; }
+        h1 { font-size: 18px; text-align: center; margin-bottom: 20px; color: var(--primary); font-weight: 900; }
+        .label { font-size: 12px; font-weight: bold; color: var(--gray); margin: 15px 0 5px 4px; display: flex; justify-content: space-between; align-items: center; }
         
-        /* 数値入力グリッド */
-        .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .input-group { background: #1f2937; padding: 10px; border-radius: 12px; }
-        .input-group span { font-size: 11px; display: block; margin-bottom: 5px; color: #9ca3af; }
-        input[type="number"], input[type="text"] { width: 100%; background: transparent; border: 1px solid #374151; color: white; padding: 8px; border-radius: 8px; font-size: 16px; font-weight: bold; }
+        .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+        .input-group { background: #1f2937; padding: 10px; border-radius: 12px; border: 1px solid #374151; }
+        .input-group span { font-size: 10px; display: block; margin-bottom: 5px; color: #9ca3af; }
+        input { width: 100%; background: transparent; border: none; color: white; font-size: 16px; font-weight: bold; outline: none; }
 
-        /* 修行範囲 */
-        .range-box { background: #1e1b4b; padding: 15px; border-radius: 16px; border: 1px solid var(--accent); margin-bottom: 20px; }
-        
-        textarea { width: 100%; height: 60px; background: rgba(0,0,0,0.4); color: #94a3b8; border: 1px solid #374151; border-radius: 12px; padding: 10px; font-size: 11px; margin-top: 5px; }
+        .range-box { background: #1e1b4b; padding: 15px; border-radius: 16px; border: 1px solid var(--accent); margin-bottom: 15px; }
+        textarea { width: 100%; height: 60px; background: rgba(0,0,0,0.4); color: #94a3b8; border: 1px solid #374151; border-radius: 12px; padding: 10px; font-size: 11px; margin-top: 5px; outline: none; }
 
-        button.main-btn { width: 100%; height: 60px; border: none; border-radius: 20px; font-size: 20px; font-weight: 900; cursor: pointer; background: var(--primary); color: white; transition: 0.2s; }
+        button.main-btn { width: 100%; height: 60px; border: none; border-radius: 20px; font-size: 20px; font-weight: 900; cursor: pointer; background: var(--primary); color: white; transition: 0.2s; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
         button.main-btn:active { transform: scale(0.98); }
         
         #card { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; text-align: center; }
@@ -50,14 +47,12 @@
         #progressBar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s linear; }
         
         .ans-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; margin-bottom: 20px; }
-        .ans-btn { height: 80px; border: none; border-radius: 24px; color: white; font-size: 24px; font-weight: bold; cursor: pointer; }
-        #correctBtn { background: var(--success); box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4); }
-        #wrongBtn { background: var(--danger); box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4); }
+        .ans-btn { height: 85px; border: none; border-radius: 28px; color: white; font-size: 24px; font-weight: bold; cursor: pointer; }
+        #correctBtn { background: var(--success); }
+        #wrongBtn { background: var(--danger); }
         
-        #gaugeContainer { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #1f2937; }
-        #gauge { height: 100%; background: var(--success); width: 0%; }
-
-        .toggle-btn { background: #374151; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 10px; cursor: pointer; }
+        #gauge { position: absolute; bottom: 0; left: 0; height: 4px; background: var(--success); width: 0%; }
+        .toggle-btn { background: #374151; color: white; border: none; padding: 4px 8px; border-radius: 6px; font-size: 10px; cursor: pointer; }
         .toggle-btn.active { background: var(--success); }
     </style>
 </head>
@@ -68,10 +63,14 @@
         <h1>SYSTEM VOCABULARY</h1>
         
         <div class="range-box">
-            <div class="label">修行範囲指定（1～2027）</div>
+            <div class="label">修行範囲と出題数設定</div>
             <div class="param-grid">
                 <div class="input-group"><span>開始番号</span><input type="number" id="rangeStart" value="1" step="100"></div>
-                <div class="input-group"><span>終了番号</span><input type="number" id="rangeEnd" value="100" step="100"></div>
+                <div class="input-group"><span>終了番号</span><input type="number" id="rangeEnd" value="2027" step="100"></div>
+            </div>
+            <div class="input-group" style="background: rgba(255,255,255,0.1);">
+                <span>今回のテスト単語数（100語ずつ調整可）</span>
+                <input type="number" id="testCount" value="100" step="100">
             </div>
         </div>
 
@@ -80,8 +79,8 @@
             <button id="ttsToggle" class="toggle-btn active" onclick="toggleTTS()">読み上げON</button>
         </div>
         <div class="param-grid">
-            <div class="input-group"><span>読み上げ速度</span><input type="number" id="speechRate" value="1.6" step="0.1"></div>
-            <div class="input-group"><span>発音間隔(秒)</span><input type="number" id="voiceGap" value="0.0" step="0.1"></div>
+            <div class="input-group"><span>速度</span><input type="number" id="speechRate" value="1.6" step="0.1"></div>
+            <div class="input-group"><span>間隔(秒)</span><input type="number" id="voiceGap" value="0.0" step="0.1"></div>
         </div>
 
         <div class="label">修行時間調整(秒)</div>
@@ -90,7 +89,7 @@
             <div class="input-group"><span>解答制限</span><input type="number" id="japTime" value="1.5" step="0.1"></div>
         </div>
 
-        <div class="label">暗記数値インポート</div>
+        <div class="label">暗記数値インポート（これに含まれる語を優先）</div>
         <textarea id="importArea" placeholder="数値データをここに貼り付け"></textarea>
 
         <button class="main-btn" onclick="startTraining()">修行開始</button>
@@ -102,30 +101,30 @@
     <div class="progress-container"><div id="progressBar"></div></div>
     
     <div id="card">
-        <div id="englishWord">Ready?</div>
-        <div id="japaneseWord">準備</div>
-        <div id="gaugeContainer"><div id="gauge"></div></div>
+        <div id="englishWord"></div>
+        <div id="japaneseWord"></div>
+        <div id="gauge"></div>
     </div>
 
     <div class="ans-btns">
         <button id="wrongBtn" class="ans-btn" onclick="processAnswer(false)">苦手(A)</button>
         <button id="correctBtn" class="ans-btn" onclick="processAnswer(true)">正解(Z)</button>
     </div>
-    <button onclick="finishTraining()" style="background:none; border:none; color:var(--gray); font-size:12px;">修行を切り上げる (Space)</button>
+    <button onclick="finishTraining()" style="background:none; border:none; color:var(--gray); font-size:12px;">終了 (Space)</button>
 </div>
 
 <div id="report">
     <div class="container" style="text-align:center;">
-        <h1>修行結果</h1>
+        <h1>修行完了</h1>
         <div id="resultScore" style="font-size:28px; font-weight:900; margin-bottom:20px;"></div>
         
         <div class="label">復習用（間違えた単語）</div>
         <textarea id="wrongWordsArea" style="height:120px;" readonly></textarea>
-        <button class="copy-btn" onclick="copyText('wrongWordsArea')" style="width:100%; padding:10px; margin:10px 0; background:var(--accent); border:none; color:white; border-radius:10px;">単語をコピー</button>
+        <button class="copy-btn" onclick="copyText('wrongWordsArea')" style="width:100%; padding:12px; margin:10px 0; background:var(--accent); border:none; color:white; border-radius:12px; font-weight:bold;">単語をコピー</button>
 
         <div class="label">保存用（暗記数値データ）</div>
         <textarea id="numericalArea" style="height:80px;" readonly></textarea>
-        <button class="copy-btn" onclick="copyText('numericalArea')" style="width:100%; padding:10px; background:var(--primary); border:none; color:white; border-radius:10px;">数値をコピー</button>
+        <button class="copy-btn" onclick="copyText('numericalArea')" style="width:100%; padding:12px; background:var(--primary); border:none; color:white; border-radius:12px; font-weight:bold;">数値をコピー</button>
 
         <button class="main-btn" onclick="location.reload()" style="margin-top:20px; background:var(--gray);">トップへ</button>
     </div>
@@ -134,12 +133,12 @@
 <script>
 const WORDS = [];
 const mastery = {};
-let config = {};
 let ttsEnabled = true;
 let queue = [];
 let results = [];
 let activeWord = null;
 let timers = { eng: null, jap: null };
+let importedIds = new Set();
 
 window.onload = () => {
     const raw = document.getElementById('words-data').textContent.trim();
@@ -161,31 +160,47 @@ function toggleTTS() {
     ttsEnabled = !ttsEnabled;
     const btn = document.getElementById('ttsToggle');
     btn.textContent = ttsEnabled ? "読み上げON" : "読み上げOFF";
-    btn.className = ttsEnabled ? "toggle-btn active" : "toggle-btn";
+    btn.classList.toggle('active', ttsEnabled);
 }
 
 function startTraining() {
-    config = {
-        start: parseInt(document.getElementById('rangeStart').value),
-        end: parseInt(document.getElementById('rangeEnd').value),
-        speechRate: parseFloat(document.getElementById('speechRate').value),
-        voiceGap: parseFloat(document.getElementById('voiceGap').value),
-        engTime: parseFloat(document.getElementById('engTime').value),
-        japTime: parseFloat(document.getElementById('japTime').value)
-    };
+    const startNum = parseInt(document.getElementById('rangeStart').value);
+    const endNum = parseInt(document.getElementById('rangeEnd').value);
+    const maxTest = parseInt(document.getElementById('testCount').value);
+    importedIds.clear();
 
     const imp = document.getElementById('importArea').value.trim();
     if (imp) {
         imp.split(/[,\n ]/).forEach(e => {
             const [id, lv, iv] = e.split(':').map(Number);
-            if (mastery[id]) mastery[id] = { lv: lv || 0, iv: iv || 1 };
+            if (mastery[id]) {
+                mastery[id] = { lv: lv || 0, iv: iv || 1 };
+                importedIds.add(id);
+            }
         });
     }
 
-    queue = WORDS.filter(w => w.id >= config.start && w.id <= config.end)
-                 .sort((a, b) => (mastery[a.id].iv - mastery[a.id].lv) - (mastery[b.id].iv - mastery[b.id].lv) || Math.random() - 0.5);
+    // フィルタリング: 範囲内 かつ levelが10未満（わかっている単語は除外）
+    let available = WORDS.filter(w => w.id >= startNum && w.id <= endNum && mastery[w.id].lv < 10);
 
-    if (queue.length === 0) return alert("範囲外です");
+    // ソート順: 
+    // 1. インポートされたID（以前間違えた・学習中）を最優先
+    // 2. 優先度スコア（iv - lv）が小さい順
+    // 3. ランダム
+    available.sort((a, b) => {
+        const isAImported = importedIds.has(a.id) ? 0 : 1;
+        const isBImported = importedIds.has(b.id) ? 0 : 1;
+        if (isAImported !== isBImported) return isAImported - isBImported;
+        
+        const scoreA = mastery[a.id].iv - mastery[a.id].lv;
+        const scoreB = mastery[b.id].iv - mastery[b.id].lv;
+        return scoreA - scoreB || Math.random() - 0.5;
+    });
+
+    // 指定単語数でカット
+    queue = available.slice(0, maxTest);
+
+    if (queue.length === 0) return alert("対象となる単語（未習得語）が見つかりません。範囲を広げるかlevelを確認してください。");
 
     results = [];
     document.getElementById("setup").classList.remove('active');
@@ -199,46 +214,45 @@ function nextWord() {
 
     activeWord = queue.shift();
     const total = results.length + queue.length + 1;
-    document.getElementById("infoText").textContent = `ID:${activeWord.id} | ${results.length + 1} / ${total}`;
+    document.getElementById("infoText").textContent = `ID:${activeWord.id} (Lv:${mastery[activeWord.id].lv}) | ${results.length + 1} / ${total}`;
     document.getElementById("progressBar").style.width = `${(results.length / total) * 100}%`;
     
     document.getElementById("englishWord").textContent = activeWord.en;
     const jaEl = document.getElementById("japaneseWord");
     jaEl.textContent = activeWord.ja;
     jaEl.classList.remove('visible');
-    
-    document.getElementById("gauge").style.transition = "none";
     document.getElementById("gauge").style.width = "0%";
 
     if (ttsEnabled) speakChain(activeWord.en, activeWord.ja);
-
-    timers.eng = setTimeout(showAnswer, config.engTime * 1000);
+    timers.eng = setTimeout(showAnswer, parseFloat(document.getElementById('engTime').value) * 1000);
 }
 
 function speakChain(en, ja) {
     speechSynthesis.cancel();
+    const rate = parseFloat(document.getElementById('speechRate').value);
+    const gap = parseFloat(document.getElementById('voiceGap').value);
+    
     const uEn = new SpeechSynthesisUtterance(en);
     uEn.lang = 'en-US';
-    uEn.rate = config.speechRate;
+    uEn.rate = rate;
     
     const uJa = new SpeechSynthesisUtterance(ja);
     uJa.lang = 'ja-JP';
-    uJa.rate = config.speechRate;
+    uJa.rate = rate;
 
     uEn.onend = () => {
-        timers.voiceGap = setTimeout(() => {
-            speechSynthesis.speak(uJa);
-        }, config.voiceGap * 1000);
+        timers.voiceGap = setTimeout(() => { speechSynthesis.speak(uJa); }, gap * 1000);
     };
     speechSynthesis.speak(uEn);
 }
 
 function showAnswer() {
     document.getElementById("japaneseWord").classList.add('visible');
+    const japTime = parseFloat(document.getElementById('japTime').value);
     const g = document.getElementById("gauge");
-    g.style.transition = `width ${config.japTime}s linear`;
+    g.style.transition = `width ${japTime}s linear`;
     g.style.width = "100%";
-    timers.jap = setTimeout(() => processAnswer(false), config.japTime * 1000);
+    timers.jap = setTimeout(() => processAnswer(false), japTime * 1000);
 }
 
 function processAnswer(isOk) {
@@ -250,7 +264,7 @@ function processAnswer(isOk) {
     } else {
         m.lv = Math.max(-5, m.lv - 2);
         m.iv = 1;
-        queue.push(activeWord); // 苦手は最後に回す
+        queue.push(activeWord); 
     }
     results.push({ ...activeWord, ok: isOk });
     nextWord();
@@ -258,6 +272,9 @@ function processAnswer(isOk) {
 
 function clearAllTimers() {
     for (let k in timers) clearTimeout(timers[k]);
+    const g = document.getElementById("gauge");
+    g.style.transition = "none";
+    g.style.width = "0%";
 }
 
 function finishTraining() {
@@ -275,7 +292,7 @@ function copyText(id) {
     const el = document.getElementById(id);
     el.select();
     document.execCommand('copy');
-    alert("Copied!");
+    alert("コピーしました");
 }
 
 document.onkeydown = (e) => {
@@ -286,6 +303,7 @@ document.onkeydown = (e) => {
     if (e.code === "Space") { e.preventDefault(); finishTraining(); }
 };
 </script>
+
 
 <script type="text/plain" id="words-data">
 follow,～の後に続く/～に従う1

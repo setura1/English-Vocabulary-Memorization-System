@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-    <title>システム英単語修行 極限管理版V2</title>
+    <title>システム英単語修行 極限管理版V2.1</title>
     <style>
         :root {
             --bg: #070b14;
@@ -54,6 +54,8 @@
         #gauge { position: absolute; bottom: 0; left: 0; height: 4px; background: var(--success); width: 0%; }
         .toggle-btn { background: #374151; color: white; border: none; padding: 4px 8px; border-radius: 6px; font-size: 10px; cursor: pointer; }
         .toggle-btn.active { background: var(--success); }
+
+        #remainingCounter { font-weight: bold; color: var(--accent); }
     </style>
 </head>
 <body>
@@ -180,27 +182,19 @@ function startTraining() {
         });
     }
 
-    // フィルタリング: 範囲内 かつ levelが10未満（わかっている単語は除外）
     let available = WORDS.filter(w => w.id >= startNum && w.id <= endNum && mastery[w.id].lv < 10);
 
-    // ソート順: 
-    // 1. インポートされたID（以前間違えた・学習中）を最優先
-    // 2. 優先度スコア（iv - lv）が小さい順
-    // 3. ランダム
     available.sort((a, b) => {
         const isAImported = importedIds.has(a.id) ? 0 : 1;
         const isBImported = importedIds.has(b.id) ? 0 : 1;
         if (isAImported !== isBImported) return isAImported - isBImported;
-        
         const scoreA = mastery[a.id].iv - mastery[a.id].lv;
         const scoreB = mastery[b.id].iv - mastery[b.id].lv;
         return scoreA - scoreB || Math.random() - 0.5;
     });
 
-    // 指定単語数でカット
     queue = available.slice(0, maxTest);
-
-    if (queue.length === 0) return alert("対象となる単語（未習得語）が見つかりません。範囲を広げるかlevelを確認してください。");
+    if (queue.length === 0) return alert("修行対象が見つかりません。");
 
     results = [];
     document.getElementById("setup").classList.remove('active');
@@ -213,9 +207,14 @@ function nextWord() {
     if (queue.length === 0) return finishTraining();
 
     activeWord = queue.shift();
-    const total = results.length + queue.length + 1;
-    document.getElementById("infoText").textContent = `ID:${activeWord.id} (Lv:${mastery[activeWord.id].lv}) | ${results.length + 1} / ${total}`;
-    document.getElementById("progressBar").style.width = `${(results.length / total) * 100}%`;
+    const currentNum = results.length + 1;
+    const totalNum = results.length + queue.length + 1;
+    const remainingNum = queue.length; // 残りの数
+
+    document.getElementById("infoText").innerHTML = 
+        `ID:${activeWord.id} (Lv:${mastery[activeWord.id].lv}) | ${currentNum} / ${totalNum} <span id="remainingCounter">(残り ${remainingNum}語)</span>`;
+    
+    document.getElementById("progressBar").style.width = `${(results.length / totalNum) * 100}%`;
     
     document.getElementById("englishWord").textContent = activeWord.en;
     const jaEl = document.getElementById("japaneseWord");
@@ -231,18 +230,13 @@ function speakChain(en, ja) {
     speechSynthesis.cancel();
     const rate = parseFloat(document.getElementById('speechRate').value);
     const gap = parseFloat(document.getElementById('voiceGap').value);
-    
     const uEn = new SpeechSynthesisUtterance(en);
     uEn.lang = 'en-US';
     uEn.rate = rate;
-    
     const uJa = new SpeechSynthesisUtterance(ja);
     uJa.lang = 'ja-JP';
     uJa.rate = rate;
-
-    uEn.onend = () => {
-        timers.voiceGap = setTimeout(() => { speechSynthesis.speak(uJa); }, gap * 1000);
-    };
+    uEn.onend = () => { timers.voiceGap = setTimeout(() => { speechSynthesis.speak(uJa); }, gap * 1000); };
     speechSynthesis.speak(uEn);
 }
 
@@ -303,7 +297,6 @@ document.onkeydown = (e) => {
     if (e.code === "Space") { e.preventDefault(); finishTraining(); }
 };
 </script>
-
 
 <script type="text/plain" id="words-data">
 follow,～の後に続く/～に従う1

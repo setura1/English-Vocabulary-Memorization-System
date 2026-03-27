@@ -1,11 +1,4 @@
-
-            const id = parseInt(m[2]);
-            idMap.set(id, { id, en: parts[0].trim(), ja: m[1], raw: line });
-        }
-    });
-    WORDS.length = 0;
-    WORDS.push(...Array.from(idMap.values()));
-    CURRENT_TOT<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -220,6 +213,7 @@ function loadData() {
     raw.split('\n').forEach(line => {
         const parts = line.split(',');
         if (parts.length < 2) return;
+        // 末尾の数値をIDとして抽出
         const m = parts[1].trim().match(/^(.*?)(\d+)$/);
         if (m) {
             const id = parseInt(m[2]);
@@ -227,7 +221,7 @@ function loadData() {
         }
     });
     WORDS.length = 0;
-    WORDS.push(...Array.from(idMap.values()));
+    WORDS.push(...Array.from(idMap.values()).sort((a,b) => a.id - b.id));
     CURRENT_TOTAL = WORDS.length || 2027;
 }
 
@@ -254,7 +248,6 @@ function updateDashboard() {
 
 function speakEn(txt) {
     window.speechSynthesis.cancel();
-    // 発音の邪魔になる非英字（記号など）を除去して発音をクリアにする
     const cleanTxt = txt.replace(/[^a-zA-Z ]/g, "");
     const ut = new SpeechSynthesisUtterance(cleanTxt);
     ut.lang = 'en-US';
@@ -268,7 +261,6 @@ function speakEn(txt) {
 }
 
 function speakJa(txt) {
-    // 読み上げのテンポを落とさないよう記号を消す
     const cleanJa = txt.replace(/[～/]/g, "");
     const ut = new SpeechSynthesisUtterance(cleanJa);
     ut.lang = 'ja-JP';
@@ -352,6 +344,7 @@ function startStressTimer() {
 
 function processAnswer(isOk) {
     clearTimeout(stressTimer);
+    if (!activeWord) return;
     const id = activeWord.id;
     const prev = mastery[id];
     if (isOk) {
@@ -380,7 +373,8 @@ function saveAll() {
     localStorage.setItem('sisutan_mastery_v15', JSON.stringify(mastery));
     const config = {};
     ['rangeStart', 'rangeEnd', 'rateEn', 'rateJa', 'limitTime', 'testLimit'].forEach(k => {
-        config[k] = document.getElementById(k).value;
+        const el = document.getElementById(k);
+        if(el) config[k] = el.value;
     });
     localStorage.setItem('sisutan_config_v15', JSON.stringify(config));
 }
@@ -439,7 +433,10 @@ window.onload = () => {
     if (savedC) {
         const c = JSON.parse(savedC);
         ['rangeStart', 'rangeEnd', 'rateEn', 'rateJa', 'limitTime', 'testLimit'].forEach(k => {
-            if (c[k]) document.getElementById(k).value = c[k];
+            if (c[k]) {
+                const el = document.getElementById(k);
+                if(el) el.value = c[k];
+            }
         });
     }
     setupVoices();
@@ -454,7 +451,6 @@ document.onkeydown = (e) => {
     if (e.code === 'Space') { e.preventDefault(); finishTraining(); }
 };
 </script>
-
 <script type="text/plain" id="words-raw-data">
 follow,従う/続く1
 consider,考慮する2
